@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"strings"
 
-	"der2text/der"
-	"der2text/indenter"
+	"github.com/syncsynchalt/der2text/der"
+	"github.com/syncsynchalt/der2text/indenter"
 )
 
 func Parse(out indenter.Indenter, data []byte) {

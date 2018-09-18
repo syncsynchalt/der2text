@@ -1,7 +1,7 @@
 package der
 
 import (
-	"der2text/indenter"
+	"github.com/syncsynchalt/der2text/indenter"
 	"encoding/base64"
 	"strconv"
 )

@@ -1,6 +1,9 @@
 all: read
 
 read:
-	go build der2text/cmds/der2text
+	go build github.com/syncsynchalt/der2text/cmds/der2text
 
-.PHONY: read
+clean:
+	rm -f der2text
+
+.PHONY: read clean
