@@ -37,7 +37,7 @@ func Parse(out *indenter.Indenter, data []byte) {
 
 	out.Println("PEM ENCODED", typ)
 
-	b64 := str[len(head) : len(str)-len(tail)-1]
+	b64 := str[len(head) : len(str)-len(tail)]
 	for len(b64)%4 != 0 {
 		b64 += "="
 	}
