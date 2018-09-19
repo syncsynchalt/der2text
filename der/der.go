@@ -1,6 +1,7 @@
 package der
 
 import (
+	"errors"
 	"fmt"
 	"github.com/syncsynchalt/der2text/hinter"
 	"github.com/syncsynchalt/der2text/indenter"
@@ -51,15 +52,20 @@ const (
 	typeIsLongFormTag     = 0x1F
 )
 
-func Parse(out *indenter.Indenter, data []byte) {
+func Parse(out *indenter.Indenter, data []byte) error {
 	for len(data) > 0 {
-		data = parseElement(out, data)
+		var err error
+		data, err = parseElement(out, data)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
+func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) {
 	if len(data) < 2 {
-		panic("short DER read, need at least two bytes, got " + strconv.Itoa(len(data)))
+		return nil, errors.New("short DER read, need at least two bytes, got " + strconv.Itoa(len(data)))
 	}
 
 	typeByte := data[0]
@@ -68,7 +74,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 	typeClass := typeByte & 0xC0
 
 	if typeTag == typeIsLongFormTag {
-		panic("Long form DER types not implemented")
+		return nil, errors.New("Long form DER types not implemented")
 	}
 
 	switch typeClass {
@@ -91,7 +97,8 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 
 	contentLen, rest := decodeLength(data[1:])
 	if len(rest) < contentLen {
-		panic("Short content, need " + strconv.Itoa(contentLen) + " bytes but have " + strconv.Itoa(len(rest)))
+		return nil, errors.New("Short content, need " + strconv.Itoa(contentLen) +
+			" bytes but have " + strconv.Itoa(len(rest)))
 	}
 	content := rest[:contentLen]
 	rest = rest[contentLen:]
@@ -99,12 +106,12 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 	switch typeByte {
 	case typeEndOfContent | primitive:
 		if contentLen != 0 {
-			panic("End-of-content had unexpected length " + strconv.Itoa(contentLen))
+			return nil, errors.New("End-of-content had unexpected length " + strconv.Itoa(contentLen))
 		}
 		out.Println("END-OF-CONTENT")
 	case typeBoolean | primitive:
 		if contentLen != 1 {
-			panic("Boolean had unexpected length " + strconv.Itoa(contentLen))
+			return nil, errors.New("Boolean had unexpected length " + strconv.Itoa(contentLen))
 		}
 		if content[0] == byte(0) {
 			out.Println("BOOLEAN FALSE")
@@ -115,11 +122,11 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 		handleInteger("INTEGER", out, content)
 	case typeBitString | primitive:
 		if contentLen < 1 {
-			panic("BitString had no padding byte")
+			return nil, errors.New("BitString had no padding byte")
 		}
 		padding := int(content[0])
 		if padding < 0 || padding > 7 {
-			panic("BitString padding has illegal value " + strconv.Itoa(padding))
+			return nil, errors.New("BitString padding has illegal value " + strconv.Itoa(padding))
 		}
 		out.Printf("BITSTRING PAD=%d ", padding)
 		printOctets(out, content[1:])
@@ -128,12 +135,12 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 		handleData("OCTETSTRING", out, content)
 	case typeNull | primitive:
 		if contentLen != 0 {
-			panic("Null has non-zero content")
+			return nil, errors.New("Null has non-zero content")
 		}
 		out.Print("NULL\n")
 	case typeObjectIdentifier | primitive:
 		if contentLen < 1 {
-			panic("OID doesn't have content")
+			return nil, errors.New("OID doesn't have content")
 		}
 		first := content[0] / 40
 		second := content[0] % 40
@@ -217,7 +224,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 	case typeUniversalString | primitive:
 		b, err := utf32ToUtf8(content)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		handleString("UNIVERSALSTRING", out, b)
 	case typeCharacterString | primitive:
@@ -225,7 +232,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 	case typeBMPString | primitive:
 		b, err := utf16ToUtf8(content)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		handleString("BMPSTRING", out, b)
 	default:
@@ -233,7 +240,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 		handleData(label, out, content)
 	}
 
-	return rest
+	return rest, nil
 }
 
 func decodeLength(data []byte) (length int, rest []byte) {

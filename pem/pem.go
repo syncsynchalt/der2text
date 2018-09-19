@@ -2,13 +2,14 @@ package pem
 
 import (
 	"encoding/base64"
+	"errors"
 	"strings"
 
 	"github.com/syncsynchalt/der2text/der"
 	"github.com/syncsynchalt/der2text/indenter"
 )
 
-func Parse(out *indenter.Indenter, data []byte) {
+func Parse(out *indenter.Indenter, data []byte) error {
 	str := string(data)
 
 	str = strings.Map(func(r rune) rune {
@@ -20,7 +21,7 @@ func Parse(out *indenter.Indenter, data []byte) {
 	}, str)
 
 	if len(str) < 11 || str[:11] != "-----BEGIN " {
-		panic("Unable to parse PEM header")
+		return errors.New("Unable to parse PEM header")
 	}
 
 	eot := strings.IndexRune(str[11:], '-')
@@ -29,10 +30,10 @@ func Parse(out *indenter.Indenter, data []byte) {
 	head := "-----BEGIN " + typ + "-----"
 	tail := "-----END " + typ + "-----"
 	if !strings.HasPrefix(str, head) {
-		panic("PEM doesn't have expected prefix " + head)
+		return errors.New("PEM doesn't have expected prefix " + head)
 	}
 	if !strings.HasSuffix(str, tail) {
-		panic("PEM doesn't have expected suffix " + tail)
+		return errors.New("PEM doesn't have expected suffix " + tail)
 	}
 
 	out.Println("PEM ENCODED", typ)
@@ -43,8 +44,8 @@ func Parse(out *indenter.Indenter, data []byte) {
 	}
 	derData, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	der.Parse(out.NextLevel(), derData)
+	return der.Parse(out.NextLevel(), derData)
 }
