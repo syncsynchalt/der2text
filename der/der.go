@@ -229,7 +229,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 		}
 		handleString("BMPSTRING", out, b)
 	default:
-		label := fmt.Sprintf("UNHANDLED TAG=%02x", typeTag)
+		label := fmt.Sprintf("UNHANDLED-TAG=%02x", typeTag)
 		handleData(label, out, content)
 	}
 
