@@ -20,6 +20,7 @@ func isMostlyPrintable(content []byte) bool {
 	return false
 }
 
+// if the data looks like it's mostly text then print what we can as a hint to the human reading it
 func PrintHint(out *indenter.Indenter, content []byte) {
 	if isMostlyPrintable(content) {
 		out.Print("# data: \"")

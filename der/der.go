@@ -53,11 +53,11 @@ const (
 
 func Parse(out *indenter.Indenter, data []byte) {
 	for len(data) > 0 {
-		data = parseOne(out, data)
+		data = parseElement(out, data)
 	}
 }
 
-func parseOne(out *indenter.Indenter, data []byte) (rest []byte) {
+func parseElement(out *indenter.Indenter, data []byte) (rest []byte) {
 	if len(data) < 2 {
 		panic("short DER read, need at least two bytes, got " + strconv.Itoa(len(data)))
 	}
