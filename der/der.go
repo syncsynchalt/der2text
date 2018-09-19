@@ -1,10 +1,11 @@
 package der
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/syncsynchalt/der2text/indenter"
 	"github.com/syncsynchalt/der2text/oids"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/encoding/unicode/utf32"
 	"strconv"
 )
 
@@ -71,6 +72,7 @@ func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
 
 	switch typeClass {
 	case classUniversal:
+		out.Print("UNIVERSAL ")
 	case classApplication:
 		out.Print("APPLICATION ")
 	case classContextSpecific:
@@ -112,29 +114,21 @@ func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
 		if contentLen < 1 {
 			panic("Integer had no content")
 		}
-		if contentLen > 8 {
-			panic("Can't handle integer of " + strconv.Itoa(contentLen) + " octets")
-		}
-		value := int64(0)
-		if content[0]&0x80 == 0 {
-			// positive number
-			for _, v := range content {
-				value *= 256
-				value += int64(v)
-			}
-		} else {
-			// negative number
-			for i, v := range content {
-				value *= 256
-				if i == 0 && v == 0xff {
-					// skip
-					continue
+		if contentLen > 0 && contentLen < 8 && content[0]&0x80 == 0 {
+			// conveniently display it
+			value := int64(0)
+			if content[0]&0x80 == 0 {
+				// positive number
+				for _, v := range content {
+					value *= 256
+					value += int64(v)
 				}
-				value -= int64(0xff^v) + 1
-				// fixme - test with multiple octets
 			}
+			out.Println("INTEGER", value)
+		} else if contentLen > 8 || content[0]&0x80 != 0 {
+			// just dump it in hex
+			handleData("INTEGER", out, content)
 		}
-		out.Println("INTEGER", value)
 	case typeBitString | primitive:
 		if contentLen < 1 {
 			panic("BitString had no padding byte")
@@ -144,16 +138,10 @@ func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
 			panic("BitString padding has illegal value " + strconv.Itoa(padding))
 		}
 		out.Printf("BITSTRING PAD:%d ", padding)
-		for _, v := range content[1:] {
-			out.Printf("%02X", v)
-		}
+		printOctets(out, content[1:])
 		out.Print("\n")
 	case typeOctetString | primitive:
-		out.Print("OCTETSTRING ")
-		for _, v := range content {
-			out.Printf("%02X", v)
-		}
-		out.Print("\n")
+		handleData("OCTETSTRING", out, content)
 	case typeNull | primitive:
 		if contentLen != 0 {
 			panic("Null has non-zero content")
@@ -181,26 +169,42 @@ func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
 			out.Println("#", oidHint)
 		}
 	case typeUtf8String | primitive:
-		out.Print("UTF8STRING ")
-		for _, v := range content {
-			if v == '\n' {
-				out.Print("\\n")
-			} else if v == '\r' {
-				out.Print("\\r")
-			} else {
-				out.Printf("%c", v)
-			}
-		}
-		out.Print("\n")
+		handleString("UTF8STRING", out, content)
+	case typePrintableString | primitive:
+		handleString("PRINTABLESTRING", out, content)
 	case typeSet | composed:
 		out.Println("SET")
 		Parse(out.NextLevel(), content)
 	case typeSequence | composed:
 		out.Println("SEQUENCE")
 		Parse(out.NextLevel(), content)
+	case typeIA5String | primitive:
+		handleString("IA5STRING", out, content)
+	case typeUTCTime | primitive:
+		handleData("UTCTIME", out, content)
+		if len(content) == 13 && content[12] == 'Z' {
+			out.Printf("# 20%s-%s-%s %s:%s:%s GMT\n",
+				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
+		} else if len(content) == 11 && content[10] == 'Z' {
+			out.Printf("# 20%s-%s-%s %s:%s:00 GMT\n",
+				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
+		}
+	case typeUniversalString | primitive:
+		b, err := utf32ToUtf8(content)
+		if err != nil {
+			panic(err)
+		}
+		handleString("UNIVERSALSTRING", out, b)
+	case typeBMPString | primitive:
+		b, err := utf16ToUtf8(content)
+		if err != nil {
+			panic(err)
+		}
+		handleString("BMPSTRING", out, b)
 	default:
-		out.Printf("UNHANDLED CLASS:%x COMPOSED:%x TAG:%02x LENGTH:%d DATA:%s\n",
-			typeClass, typeComposed, typeTag, contentLen, base64.StdEncoding.EncodeToString(content))
+		out.Printf("UNHANDLED CLASS:%x COMPOSED:%x TAG:%02x ", typeClass, typeComposed, typeTag)
+		printOctets(out, content)
+		out.Print("\n")
 	}
 
 	return rest
@@ -222,4 +226,44 @@ func decodeLength(data []byte) (length int, rest []byte) {
 	} else {
 		return int(firstByte), data[1:]
 	}
+}
+
+func printString(out indenter.Indenter, content []byte) {
+	for _, v := range content {
+		if v == '\n' {
+			out.Print("\\n")
+		} else if v == '\r' {
+			out.Print("\\r")
+		} else {
+			out.Printf("%c", v)
+		}
+	}
+}
+
+func handleData(label string, out indenter.Indenter, content []byte) {
+	out.Printf("%s :", label)
+	printOctets(out, content)
+	out.Print("\n")
+}
+
+func handleString(label string, out indenter.Indenter, content []byte) {
+	out.Printf("%s ", label)
+	printString(out, content)
+	out.Print("\n")
+}
+
+func printOctets(out indenter.Indenter, content []byte) {
+	for _, v := range content {
+		out.Printf("%02X", v)
+	}
+}
+
+func utf16ToUtf8(input []byte) ([]byte, error) {
+	decoder := unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM).NewDecoder()
+	return decoder.Bytes(input)
+}
+
+func utf32ToUtf8(input []byte) ([]byte, error) {
+	decoder := utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM).NewDecoder()
+	return decoder.Bytes(input)
 }
