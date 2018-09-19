@@ -1,8 +1,10 @@
 package der
 
 import (
-	"github.com/syncsynchalt/der2text/indenter"
 	"encoding/base64"
+	"fmt"
+	"github.com/syncsynchalt/der2text/indenter"
+	"github.com/syncsynchalt/der2text/oids"
 	"strconv"
 )
 
@@ -133,6 +135,66 @@ func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
 			}
 		}
 		out.Println("INTEGER", value)
+	case typeBitString | primitive:
+		if contentLen < 1 {
+			panic("BitString had no padding byte")
+		}
+		padding := int(content[0])
+		if padding < 0 || padding > 7 {
+			panic("BitString padding has illegal value " + strconv.Itoa(padding))
+		}
+		out.Printf("BITSTRING PAD:%d ", padding)
+		for _, v := range content[1:] {
+			out.Printf("%02X", v)
+		}
+		out.Print("\n")
+	case typeOctetString | primitive:
+		out.Print("OCTETSTRING ")
+		for _, v := range content {
+			out.Printf("%02X", v)
+		}
+		out.Print("\n")
+	case typeNull | primitive:
+		if contentLen != 0 {
+			panic("Null has non-zero content")
+		}
+		out.Print("NULL\n")
+	case typeObjectIdentifier | primitive:
+		if contentLen < 1 {
+			panic("OID doesn't have content")
+		}
+		first := content[0] / 40
+		second := content[0] % 40
+		oid := fmt.Sprintf("%d.%d", first, second)
+		var build int
+		for _, v := range content[1:] {
+			build *= 128
+			build += int(v & 0x7f)
+			if v&0x80 == 0 {
+				oid += fmt.Sprintf(".%d", build)
+				build = 0
+			}
+		}
+		out.Println("OID", oid)
+		oidHint := oids.Name(oid)
+		if oidHint != "" {
+			out.Println("#", oidHint)
+		}
+	case typeUtf8String | primitive:
+		out.Print("UTF8STRING ")
+		for _, v := range content {
+			if v == '\n' {
+				out.Print("\\n")
+			} else if v == '\r' {
+				out.Print("\\r")
+			} else {
+				out.Printf("%c", v)
+			}
+		}
+		out.Print("\n")
+	case typeSet | composed:
+		out.Println("SET")
+		Parse(out.NextLevel(), content)
 	case typeSequence | composed:
 		out.Println("SEQUENCE")
 		Parse(out.NextLevel(), content)

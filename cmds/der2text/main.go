@@ -6,12 +6,12 @@ import (
 	"github.com/syncsynchalt/der2text/der"
 	"github.com/syncsynchalt/der2text/indenter"
 	"github.com/syncsynchalt/der2text/pem"
+	"io/ioutil"
 	"os"
-    "io/ioutil"
 )
 
 func main() {
-    var err error
+	var err error
 	calledHelp := flag.Bool("help", false, "This output")
 	calledUsage := flag.Bool("usage", false, "This output")
 	flag.Parse()
