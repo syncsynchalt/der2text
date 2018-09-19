@@ -2,6 +2,7 @@ package der
 
 import (
 	"fmt"
+	"github.com/syncsynchalt/der2text/hinter"
 	"github.com/syncsynchalt/der2text/oids"
 	"github.com/syncsynchalt/der2text/printer"
 	"golang.org/x/text/encoding/unicode"
@@ -269,6 +270,7 @@ func handleData(label string, out printer.Printer, content []byte) {
 	out.Printf("%s :", label)
 	printOctets(out, content)
 	out.Print("\n")
+	hinter.PrintHint(out, content)
 }
 
 func handleString(label string, out printer.Printer, content []byte) {
