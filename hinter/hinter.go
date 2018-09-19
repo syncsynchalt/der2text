@@ -1,7 +1,7 @@
 package hinter
 
 import (
-	"github.com/syncsynchalt/der2text/printer"
+	"github.com/syncsynchalt/der2text/indenter"
 )
 
 func isMostlyPrintable(content []byte) bool {
@@ -20,7 +20,7 @@ func isMostlyPrintable(content []byte) bool {
 	return false
 }
 
-func PrintHint(out printer.Printer, content []byte) {
+func PrintHint(out *indenter.Indenter, content []byte) {
 	if isMostlyPrintable(content) {
 		out.Print("# data: \"")
 		for _, v := range content {

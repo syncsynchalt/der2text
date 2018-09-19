@@ -2,25 +2,26 @@ package indenter
 
 import (
 	"fmt"
-	"github.com/syncsynchalt/der2text/printer"
+	"io"
 	"strings"
 )
 
 type Indenter struct {
-	atEos bool
-	level int
+	atEos  bool
+	level  int
+	writer io.Writer
 }
 
-func New() *Indenter {
-	return &Indenter{true, 0}
+func New(writer io.Writer) *Indenter {
+	return &Indenter{true, 0, writer}
 }
 
 func (i *Indenter) Println(a ...interface{}) (n int, err error) {
 	if i.atEos {
-		fmt.Print(strings.Repeat(" ", i.level))
+		fmt.Fprint(i.writer, strings.Repeat(" ", i.level))
 	}
 	i.atEos = true
-	return fmt.Println(a...)
+	return fmt.Fprintln(i.writer, a...)
 }
 
 func (i *Indenter) Printf(format string, a ...interface{}) (n int, err error) {
@@ -29,15 +30,15 @@ func (i *Indenter) Printf(format string, a ...interface{}) (n int, err error) {
 
 func (i *Indenter) Print(a ...interface{}) (n int, err error) {
 	if i.atEos {
-		fmt.Print(strings.Repeat(" ", i.level))
+		fmt.Fprint(i.writer, strings.Repeat(" ", i.level))
 	}
 	s := fmt.Sprint(a...)
 	if len(s) > 0 {
 		i.atEos = s[len(s)-1] == '\n'
 	}
-	return fmt.Print(s)
+	return fmt.Fprint(i.writer, s)
 }
 
-func (i *Indenter) NextLevel() printer.Printer {
-	return &Indenter{true, i.level + 2}
+func (i *Indenter) NextLevel() *Indenter {
+	return &Indenter{true, i.level + 2, i.writer}
 }
