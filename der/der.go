@@ -37,7 +37,7 @@ const (
 	typeNumericString     = 0x12
 	typePrintableString   = 0x13
 	typeT61String         = 0x14
-	typeVideotextString   = 0x15
+	typeVideotexString    = 0x15
 	typeIA5String         = 0x16
 	typeUTCTime           = 0x17
 	typeGeneralizedTime   = 0x18
@@ -108,27 +108,10 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 		if content[0] == byte(0) {
 			out.Println("BOOLEAN FALSE")
 		} else {
-			out.Println("BOOLEAN FALSE")
+			out.Println("BOOLEAN TRUE")
 		}
 	case typeInteger | primitive:
-		if contentLen < 1 {
-			panic("Integer had no content")
-		}
-		if contentLen > 0 && contentLen < 8 && content[0]&0x80 == 0 {
-			// conveniently display it
-			value := int64(0)
-			if content[0]&0x80 == 0 {
-				// positive number
-				for _, v := range content {
-					value *= 256
-					value += int64(v)
-				}
-			}
-			out.Println("INTEGER", value)
-		} else if contentLen > 8 || content[0]&0x80 != 0 {
-			// just dump it in hex
-			handleData("INTEGER", out, content)
-		}
+		handleInteger("INTEGER", out, content)
 	case typeBitString | primitive:
 		if contentLen < 1 {
 			panic("BitString had no padding byte")
@@ -137,7 +120,7 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 		if padding < 0 || padding > 7 {
 			panic("BitString padding has illegal value " + strconv.Itoa(padding))
 		}
-		out.Printf("BITSTRING PAD:%d ", padding)
+		out.Printf("BITSTRING PAD=%d ", padding)
 		printOctets(out, content[1:])
 		out.Print("\n")
 	case typeOctetString | primitive:
@@ -168,8 +151,37 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 		if oidHint != "" {
 			out.Println("#", oidHint)
 		}
+	case typeObjectDescription | primitive:
+		handleData("OBJECTDESCRIPTION", out, content)
+	case typeExternal | composed:
+		handleData("EXTERNAL", out, content)
+	case typeReal | primitive:
+		handleData("REAL", out, content)
+	case typeEnumerated | primitive:
+		handleInteger("ENUMERATED", out, content)
+	case typeEmbeddedPDV | composed:
+		handleData("EMBEDDED-PDV", out, content)
 	case typeUtf8String | primitive:
 		handleString("UTF8STRING", out, content)
+	case typeRelativeOID | primitive:
+		oid := ""
+		var build int
+		for _, v := range content {
+			build *= 128
+			build += int(v & 0x7f)
+			if v&0x80 == 0 {
+				oid += fmt.Sprintf(".%d", build)
+				build = 0
+			}
+		}
+		oid = oid[1:]
+		out.Println("RELATIVEOID", oid)
+		oidHint := oids.Name(oid)
+		if oidHint != "" {
+			out.Println("#", oidHint)
+		}
+	case typeNumericString | primitive:
+		handleString("NUMERICSTRING", out, content)
 	case typePrintableString | primitive:
 		handleString("PRINTABLESTRING", out, content)
 	case typeSet | composed:
@@ -178,6 +190,10 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 	case typeSequence | composed:
 		out.Println("SEQUENCE")
 		Parse(out.NextLevel(), content)
+	case typeT61String | primitive:
+		handleData("T61STRING", out, content)
+	case typeVideotexString | primitive:
+		handleData("VIDEOTEXSTRING", out, content)
 	case typeIA5String | primitive:
 		handleString("IA5STRING", out, content)
 	case typeUTCTime | primitive:
@@ -189,12 +205,22 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 			out.Printf("# 20%s-%s-%s %s:%s:00 GMT\n",
 				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
 		}
+	case typeGeneralizedTime | primitive:
+		handleString("GENERALIZEDTIME", out, content)
+	case typeGraphicString | primitive:
+		handleData("GRAPHICSTRING", out, content)
+	case typeVisibleString | primitive:
+		handleString("VISIBLESTRING", out, content)
+	case typeGeneralString | primitive:
+		handleData("GENERALSTRING", out, content)
 	case typeUniversalString | primitive:
 		b, err := utf32ToUtf8(content)
 		if err != nil {
 			panic(err)
 		}
 		handleString("UNIVERSALSTRING", out, b)
+	case typeCharacterString | primitive:
+		handleData("CHARACTERSTRING", out, content)
 	case typeBMPString | primitive:
 		b, err := utf16ToUtf8(content)
 		if err != nil {
@@ -202,9 +228,8 @@ func parseOne(out printer.Printer, data []byte) (rest []byte) {
 		}
 		handleString("BMPSTRING", out, b)
 	default:
-		out.Printf("UNHANDLED CLASS:%x COMPOSED:%x TAG:%02x ", typeClass, typeComposed, typeTag)
-		printOctets(out, content)
-		out.Print("\n")
+		label := fmt.Sprintf("UNHANDLED TAG=%02x", typeTag)
+		handleData(label, out, content)
 	}
 
 	return rest
@@ -250,6 +275,27 @@ func handleString(label string, out printer.Printer, content []byte) {
 	out.Printf("%s ", label)
 	printString(out, content)
 	out.Print("\n")
+}
+
+func handleInteger(label string, out printer.Printer, content []byte) {
+	if len(content) < 1 {
+		panic("Integer in " + label + " had no content")
+	}
+	if len(content) > 0 && len(content) < 8 && content[0]&0x80 == 0 {
+		// conveniently display it
+		value := int64(0)
+		if content[0]&0x80 == 0 {
+			// positive number
+			for _, v := range content {
+				value *= 256
+				value += int64(v)
+			}
+		}
+		out.Println(label, value)
+	} else if len(content) > 8 || content[0]&0x80 != 0 {
+		// just dump it in hex
+		handleData(label, out, content)
+	}
 }
 
 func printOctets(out printer.Printer, content []byte) {
