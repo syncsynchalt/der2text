@@ -2,6 +2,7 @@ package indenter
 
 import (
 	"fmt"
+	"github.com/syncsynchalt/der2text/printer"
 	"strings"
 )
 
@@ -10,8 +11,8 @@ type Indenter struct {
 	level int
 }
 
-func New() Indenter {
-	return Indenter{true, 0}
+func New() *Indenter {
+	return &Indenter{true, 0}
 }
 
 func (i *Indenter) Println(a ...interface{}) (n int, err error) {
@@ -37,6 +38,6 @@ func (i *Indenter) Print(a ...interface{}) (n int, err error) {
 	return fmt.Print(s)
 }
 
-func (i *Indenter) NextLevel() Indenter {
-	return Indenter{true, i.level + 2}
+func (i *Indenter) NextLevel() printer.Printer {
+	return &Indenter{true, i.level + 2}
 }

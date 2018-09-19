@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/syncsynchalt/der2text/der"
-	"github.com/syncsynchalt/der2text/indenter"
+	"github.com/syncsynchalt/der2text/printer"
 )
 
-func Parse(out indenter.Indenter, data []byte) {
+func Parse(out printer.Printer, data []byte) {
 	str := string(data)
 
 	str = strings.Map(func(r rune) rune {

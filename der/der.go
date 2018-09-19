@@ -2,8 +2,8 @@ package der
 
 import (
 	"fmt"
-	"github.com/syncsynchalt/der2text/indenter"
 	"github.com/syncsynchalt/der2text/oids"
+	"github.com/syncsynchalt/der2text/printer"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 	"strconv"
@@ -50,13 +50,13 @@ const (
 	typeIsLongFormTag     = 0x1F
 )
 
-func Parse(out indenter.Indenter, data []byte) {
+func Parse(out printer.Printer, data []byte) {
 	for len(data) > 0 {
 		data = parseOne(out, data)
 	}
 }
 
-func parseOne(out indenter.Indenter, data []byte) (rest []byte) {
+func parseOne(out printer.Printer, data []byte) (rest []byte) {
 	if len(data) < 2 {
 		panic("short DER read, need at least two bytes, got " + strconv.Itoa(len(data)))
 	}
@@ -228,7 +228,7 @@ func decodeLength(data []byte) (length int, rest []byte) {
 	}
 }
 
-func printString(out indenter.Indenter, content []byte) {
+func printString(out printer.Printer, content []byte) {
 	for _, v := range content {
 		if v == '\n' {
 			out.Print("\\n")
@@ -240,19 +240,19 @@ func printString(out indenter.Indenter, content []byte) {
 	}
 }
 
-func handleData(label string, out indenter.Indenter, content []byte) {
+func handleData(label string, out printer.Printer, content []byte) {
 	out.Printf("%s :", label)
 	printOctets(out, content)
 	out.Print("\n")
 }
 
-func handleString(label string, out indenter.Indenter, content []byte) {
+func handleString(label string, out printer.Printer, content []byte) {
 	out.Printf("%s ", label)
 	printString(out, content)
 	out.Print("\n")
 }
 
-func printOctets(out indenter.Indenter, content []byte) {
+func printOctets(out printer.Printer, content []byte) {
 	for _, v := range content {
 		out.Printf("%02X", v)
 	}
