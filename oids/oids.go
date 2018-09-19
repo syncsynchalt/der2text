@@ -15,6 +15,7 @@ var oids map[string]string = map[string]string{
 	"2.5.4.43":             "Initials",
 	"1.2.840.113549.1.9.1": "Email",
 	"1.2.840.113549.1.1.1": "RSA Encryption",
+	"1.2.840.113549.1.1.11": "sha256WithRSAEncryption",
 }
 
 func Name(oid string) string {
