@@ -274,7 +274,7 @@ func printString(out *indenter.Indenter, content []byte) {
 }
 
 func handleData(label string, out *indenter.Indenter, content []byte) {
-	out.Printf("%s :", label)
+	out.Printf("%s ", label)
 	printOctets(out, content)
 	out.Print("\n")
 	hinter.PrintHint(out, content)
@@ -308,6 +308,7 @@ func handleInteger(label string, out *indenter.Indenter, content []byte) {
 }
 
 func printOctets(out *indenter.Indenter, content []byte) {
+	out.Print(":")
 	for _, v := range content {
 		out.Printf("%02X", v)
 	}
