@@ -1,7 +1,7 @@
 package oids_test
 
 import (
-	"github.com/syncsynchalt/der2text/oids"
+	"github.com/syncsynchalt/der2text/read/oids"
 	"github.com/syncsynchalt/der2text/test"
 	"testing"
 )

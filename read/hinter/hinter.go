@@ -3,7 +3,7 @@ package hinter
 // generally useful human-readable hints for what the data might represent
 
 import (
-	"github.com/syncsynchalt/der2text/indenter"
+	"github.com/syncsynchalt/der2text/read/indenter"
 	"strconv"
 	"strings"
 )

@@ -1,7 +1,7 @@
 package indenter_test
 
 import (
-	. "github.com/syncsynchalt/der2text/indenter"
+	. "github.com/syncsynchalt/der2text/read/indenter"
 	"github.com/syncsynchalt/der2text/test"
 	"testing"
 )

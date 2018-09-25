@@ -1,8 +1,8 @@
 package der_test
 
 import (
-	. "github.com/syncsynchalt/der2text/der"
-	"github.com/syncsynchalt/der2text/indenter"
+	. "github.com/syncsynchalt/der2text/read/der"
+	"github.com/syncsynchalt/der2text/read/indenter"
 	"github.com/syncsynchalt/der2text/test"
 	"strconv"
 	"strings"

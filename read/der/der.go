@@ -3,9 +3,9 @@ package der
 import (
 	"errors"
 	"fmt"
-	"github.com/syncsynchalt/der2text/hinter"
-	"github.com/syncsynchalt/der2text/indenter"
-	"github.com/syncsynchalt/der2text/oids"
+	"github.com/syncsynchalt/der2text/read/hinter"
+	"github.com/syncsynchalt/der2text/read/indenter"
+	"github.com/syncsynchalt/der2text/read/oids"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 	"strconv"

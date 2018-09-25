@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/syncsynchalt/der2text/der"
-	"github.com/syncsynchalt/der2text/indenter"
+	"github.com/syncsynchalt/der2text/read/der"
+	"github.com/syncsynchalt/der2text/read/indenter"
 )
 
 func Parse(out *indenter.Indenter, data []byte) error {

@@ -1,5 +1,7 @@
 package indenter
 
+// Indents output at its current level.  Calls to Indenter.NextLevel() return an indenter at the next level.
+
 import (
 	"fmt"
 	"io"

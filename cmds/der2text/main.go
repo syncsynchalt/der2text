@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/syncsynchalt/der2text/der"
-	"github.com/syncsynchalt/der2text/indenter"
-	"github.com/syncsynchalt/der2text/pem"
+	"github.com/syncsynchalt/der2text/read/der"
+	"github.com/syncsynchalt/der2text/read/indenter"
+	"github.com/syncsynchalt/der2text/read/pem"
 	"io/ioutil"
 	"os"
 )

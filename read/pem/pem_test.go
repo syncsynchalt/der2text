@@ -1,8 +1,8 @@
 package pem_test
 
 import (
-	"github.com/syncsynchalt/der2text/indenter"
-	. "github.com/syncsynchalt/der2text/pem"
+	"github.com/syncsynchalt/der2text/read/indenter"
+	. "github.com/syncsynchalt/der2text/read/pem"
 	"github.com/syncsynchalt/der2text/test"
 	"testing"
 )
