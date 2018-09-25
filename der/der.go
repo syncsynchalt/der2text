@@ -172,6 +172,9 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 	case typeUtf8String | primitive:
 		handleString("UTF8STRING", out, content)
 	case typeRelativeOID | primitive:
+		if contentLen < 1 {
+			return nil, errors.New("Relative OID doesn't have content")
+		}
 		oid := ""
 		var build int
 		for _, v := range content {
@@ -199,8 +202,10 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		out.Println("SEQUENCE")
 		Parse(out.NextLevel(), content)
 	case typeT61String | primitive:
+		// handleString might be fine? just needs to be round-trip safe
 		handleData("T61STRING", out, content)
 	case typeVideotexString | primitive:
+		// handleString might be fine? just needs to be round-trip safe
 		handleData("VIDEOTEXSTRING", out, content)
 	case typeIA5String | primitive:
 		handleString("IA5STRING", out, content)
@@ -211,15 +216,17 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
 		} else if len(content) == 11 && content[10] == 'Z' {
 			out.Printf("# 20%s-%s-%s %s:%s:00 GMT\n",
-				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
+				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10])
 		}
 	case typeGeneralizedTime | primitive:
 		handleString("GENERALIZEDTIME", out, content)
 	case typeGraphicString | primitive:
+		// handleString might be fine? just needs to be round-trip safe
 		handleData("GRAPHICSTRING", out, content)
 	case typeVisibleString | primitive:
 		handleString("VISIBLESTRING", out, content)
 	case typeGeneralString | primitive:
+		// handleString might be fine? just needs to be round-trip safe
 		handleData("GENERALSTRING", out, content)
 	case typeUniversalString | primitive:
 		b, err := utf32ToUtf8(content)
@@ -228,6 +235,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		}
 		handleString("UNIVERSALSTRING", out, b)
 	case typeCharacterString | primitive:
+		// handleString might be fine? just needs to be round-trip safe
 		handleData("CHARACTERSTRING", out, content)
 	case typeBMPString | primitive:
 		b, err := utf16ToUtf8(content)
@@ -268,7 +276,7 @@ func printString(out *indenter.Indenter, content []byte) {
 		} else if v == '\r' {
 			out.Print("\\r")
 		} else {
-			out.Printf("%c", v)
+			out.Write([]byte{v})
 		}
 	}
 }

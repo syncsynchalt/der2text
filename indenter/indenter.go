@@ -39,6 +39,16 @@ func (i *Indenter) Print(a ...interface{}) (n int, err error) {
 	return fmt.Fprint(i.writer, s)
 }
 
+func (i *Indenter) Write(p []byte) (n int, err error) {
+	if i.atEos {
+		fmt.Fprint(i.writer, strings.Repeat(" ", i.level))
+	}
+	if len(p) > 0 {
+		i.atEos = p[len(p)-1] == '\n'
+	}
+	return i.writer.Write(p)
+}
+
 func (i *Indenter) NextLevel() *Indenter {
 	return &Indenter{true, i.level + 2, i.writer}
 }
