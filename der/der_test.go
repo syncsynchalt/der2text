@@ -13,7 +13,6 @@ import (
 type stringWriter struct {
 	str string
 }
-
 func (s *stringWriter) Write(p []byte) (n int, err error) {
 	s.str += string(p)
 	return len(p), nil

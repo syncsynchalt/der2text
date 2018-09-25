@@ -11,15 +11,7 @@ import (
 
 func Parse(out *indenter.Indenter, data []byte) error {
 	str := string(data)
-
-	str = strings.Map(func(r rune) rune {
-		if r == '\r' || r == '\n' {
-			return -1
-		} else {
-			return r
-		}
-	}, str)
-
+	str = strings.Trim(str, " \t\r\n")
 	if len(str) < 11 || str[:11] != "-----BEGIN " {
 		return errors.New("Unable to parse PEM header")
 	}
@@ -39,6 +31,7 @@ func Parse(out *indenter.Indenter, data []byte) error {
 	out.Println("PEM ENCODED", typ)
 
 	b64 := str[len(head) : len(str)-len(tail)]
+	b64 = stripSpaces(b64)
 	for len(b64)%4 != 0 {
 		b64 += "="
 	}
@@ -48,4 +41,8 @@ func Parse(out *indenter.Indenter, data []byte) error {
 	}
 
 	return der.Parse(out.NextLevel(), derData)
+}
+
+func stripSpaces(s string) string {
+	return strings.Join(strings.Fields(s), "")
 }
