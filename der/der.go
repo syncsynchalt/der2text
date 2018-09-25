@@ -213,14 +213,8 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 	case typeIA5String | primitive:
 		handleString("IA5STRING", out, content)
 	case typeUTCTime | primitive:
-		handleData("UTCTIME", out, content)
-		if len(content) == 13 && content[12] == 'Z' {
-			out.Printf("# 20%s-%s-%s %s:%s:%s GMT\n",
-				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10], content[10:12])
-		} else if len(content) == 11 && content[10] == 'Z' {
-			out.Printf("# 20%s-%s-%s %s:%s:00 GMT\n",
-				content[0:2], content[2:4], content[4:6], content[6:8], content[8:10])
-		}
+		handleString("UTCTIME", out, content)
+		hinter.PrintTimeHint(out, content)
 	case typeGeneralizedTime | primitive:
 		handleString("GENERALIZEDTIME", out, content)
 	case typeGraphicString | primitive:
