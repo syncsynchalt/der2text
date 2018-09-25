@@ -8,5 +8,6 @@ test:
 
 clean:
 	rm -f der2text
+	go clean -cache
 
 .PHONY: read clean test
