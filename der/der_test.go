@@ -121,7 +121,7 @@ func TestBitstringBadInputs(t *testing.T) {
 
 // currently not well handled by the util, but usable
 func TestBitstringComposed(t *testing.T) {
-	testDerOctets(t, "23 09  03 03 00 6e 5d  03 02 06 c0", `UNIVERSAL COMPOSED UNHANDLED-TAG=03 :0303006E5D030206C0
+	testDerOctets(t, "23 09  03 03 00 6e 5d  03 02 06 c0", `UNIVERSAL CONSTRUCTED UNHANDLED-TAG=03 :0303006E5D030206C0
 `)
 }
 
@@ -161,7 +161,7 @@ func TestObjectDescription(t *testing.T) {
 }
 
 func TestExternal(t *testing.T) {
-	testDerOctets(t, "28 0A 020107820500 31323334", `UNIVERSAL COMPOSED EXTERNAL :02010782050031323334
+	testDerOctets(t, "28 0A 020107820500 31323334", `UNIVERSAL CONSTRUCTED EXTERNAL :02010782050031323334
 `)
 }
 
@@ -187,7 +187,7 @@ func TestEnumerated(t *testing.T) {
 
 func TestEmbeddedPDV(t *testing.T) {
 	// you are in a maze of twisty unused types, all alike
-	testDerOctets(t, "2b 03 01 02 03", `UNIVERSAL COMPOSED EMBEDDED-PDV :010203
+	testDerOctets(t, "2b 03 01 02 03", `UNIVERSAL CONSTRUCTED EMBEDDED-PDV :010203
 `)
 }
 
@@ -268,7 +268,8 @@ func TestUTCTime(t *testing.T) {
 func TestGeneralizedTime(t *testing.T) {
 	testDerOctets(t, "18 00", `UNIVERSAL PRIMITIVE GENERALIZEDTIME '
 `)
-	testDerOctets(t, "18 0F 313830393130 30313032303030305A", `UNIVERSAL PRIMITIVE GENERALIZEDTIME '18091001020000Z
+	testDerOctets(t, "18 0D 313830393130 3031303230305A", `UNIVERSAL PRIMITIVE GENERALIZEDTIME '180910010200Z
+# 2018-09-10 01:02:00 GMT
 `)
 	testDerOctets(t, "18 13 3230303031323331 323335393539 2E 393939 5A",
 		`UNIVERSAL PRIMITIVE GENERALIZEDTIME '20001231235959.999Z
@@ -345,18 +346,18 @@ func TestBMPStringIllegal(t *testing.T) {
 }
 
 func TestSequence(t *testing.T) {
-	testDerOctets(t, "30 00", `UNIVERSAL COMPOSED SEQUENCE
+	testDerOctets(t, "30 00", `UNIVERSAL CONSTRUCTED SEQUENCE
 `)
-	testDerOctets(t, "30 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SEQUENCE
+	testDerOctets(t, "30 08"+"02017B"+"0C03616263", `UNIVERSAL CONSTRUCTED SEQUENCE
   UNIVERSAL PRIMITIVE INTEGER 123
   UNIVERSAL PRIMITIVE UTF8STRING 'abc
 `)
 }
 
 func TestSet(t *testing.T) {
-	testDerOctets(t, "31 00", `UNIVERSAL COMPOSED SET
+	testDerOctets(t, "31 00", `UNIVERSAL CONSTRUCTED SET
 `)
-	testDerOctets(t, "31 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SET
+	testDerOctets(t, "31 08"+"02017B"+"0C03616263", `UNIVERSAL CONSTRUCTED SET
   UNIVERSAL PRIMITIVE INTEGER 123
   UNIVERSAL PRIMITIVE UTF8STRING 'abc
 `)

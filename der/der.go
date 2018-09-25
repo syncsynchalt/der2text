@@ -17,8 +17,8 @@ const (
 	classContextSpecific = 2 << 6
 	classPrivate         = 3 << 6
 
-	composed  = 1 << 5
-	primitive = 0 << 5
+	constructed = 1 << 5
+	primitive   = 0 << 5
 
 	typeEndOfContent      = 0x0
 	typeBoolean           = 0x1
@@ -70,7 +70,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 
 	typeByte := data[0]
 	typeTag := typeByte & 0x1F
-	typeComposed := typeByte & 0x20
+	typeConstructed := typeByte & 0x20
 	typeClass := typeByte & 0xC0
 
 	if typeTag == typeIsLongFormTag {
@@ -88,11 +88,11 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		out.Print("PRIVATE ")
 	}
 
-	switch typeComposed {
+	switch typeConstructed {
 	case primitive:
 		out.Print("PRIMITIVE ")
-	case composed:
-		out.Print("COMPOSED ")
+	case constructed:
+		out.Print("CONSTRUCTED ")
 	}
 
 	contentLen, rest, err := decodeLength(data[1:])
@@ -164,13 +164,13 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		}
 	case typeObjectDescription | primitive:
 		handleData("OBJECTDESCRIPTION", out, content)
-	case typeExternal | composed:
+	case typeExternal | constructed:
 		handleData("EXTERNAL", out, content)
 	case typeReal | primitive:
 		handleData("REAL", out, content)
 	case typeEnumerated | primitive:
 		handleInteger("ENUMERATED", out, content)
-	case typeEmbeddedPDV | composed:
+	case typeEmbeddedPDV | constructed:
 		handleData("EMBEDDED-PDV", out, content)
 	case typeUtf8String | primitive:
 		handleString("UTF8STRING", out, content)
@@ -198,10 +198,10 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		handleString("NUMERICSTRING", out, content)
 	case typePrintableString | primitive:
 		handleString("PRINTABLESTRING", out, content)
-	case typeSet | composed:
+	case typeSet | constructed:
 		out.Println("SET")
 		Parse(out.NextLevel(), content)
-	case typeSequence | composed:
+	case typeSequence | constructed:
 		out.Println("SEQUENCE")
 		Parse(out.NextLevel(), content)
 	case typeT61String | primitive:
@@ -217,6 +217,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		hinter.PrintTimeHint(out, content)
 	case typeGeneralizedTime | primitive:
 		handleString("GENERALIZEDTIME", out, content)
+		hinter.PrintTimeHint(out, content)
 	case typeGraphicString | primitive:
 		// handleString might be fine? just needs to be round-trip safe
 		handleData("GRAPHICSTRING", out, content)
