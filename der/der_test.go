@@ -13,11 +13,13 @@ import (
 type stringWriter struct {
 	str string
 }
+
 func (s *stringWriter) Write(p []byte) (n int, err error) {
 	s.str += string(p)
 	return len(p), nil
 }
 
+// helper function used by all tests below
 func testDerOctets(tb testing.TB, inputOctets string, output string) {
 	// strip spaces
 	inputOctets = strings.Join(strings.Fields(inputOctets), "")
@@ -47,6 +49,11 @@ func TestEmpty(t *testing.T) {
 	testDerOctets(t, "", "")
 }
 
+func TestShortRead(t *testing.T) {
+	testDerOctets(t, "00", "short DER read, need at least two bytes, got 1")
+	testDerOctets(t, "00 84", "Can't satisfy request to read 4 bytes to get length")
+}
+
 func TestEoc(t *testing.T) {
 	testDerOctets(t, "00 00", `UNIVERSAL PRIMITIVE END-OF-CONTENT
 `)
@@ -65,6 +72,8 @@ func TestBooleans(t *testing.T) {
 }
 
 func TestIntegerSmallPositive(t *testing.T) {
+	testDerOctets(t, "02 00", `UNIVERSAL PRIMITIVE INTEGER :
+`)
 	testDerOctets(t, "02 01 00", `UNIVERSAL PRIMITIVE INTEGER 0
 `)
 	testDerOctets(t, "02 01 7f", `UNIVERSAL PRIMITIVE INTEGER 127
@@ -338,7 +347,7 @@ func TestBMPStringIllegal(t *testing.T) {
 func TestSequence(t *testing.T) {
 	testDerOctets(t, "30 00", `UNIVERSAL COMPOSED SEQUENCE
 `)
-	testDerOctets(t, "30 08" + "02017B" + "0C03616263", `UNIVERSAL COMPOSED SEQUENCE
+	testDerOctets(t, "30 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SEQUENCE
   UNIVERSAL PRIMITIVE INTEGER 123
   UNIVERSAL PRIMITIVE UTF8STRING abc
 `)
@@ -347,7 +356,7 @@ func TestSequence(t *testing.T) {
 func TestSet(t *testing.T) {
 	testDerOctets(t, "31 00", `UNIVERSAL COMPOSED SET
 `)
-	testDerOctets(t, "31 08" + "02017B" + "0C03616263", `UNIVERSAL COMPOSED SET
+	testDerOctets(t, "31 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SET
   UNIVERSAL PRIMITIVE INTEGER 123
   UNIVERSAL PRIMITIVE UTF8STRING abc
 `)

@@ -95,7 +95,10 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		out.Print("COMPOSED ")
 	}
 
-	contentLen, rest := decodeLength(data[1:])
+	contentLen, rest, err := decodeLength(data[1:])
+	if err != nil {
+		return nil, err
+	}
 	if len(rest) < contentLen {
 		return nil, errors.New("Short content, need " + strconv.Itoa(contentLen) +
 			" bytes but have " + strconv.Itoa(len(rest)))
@@ -251,21 +254,22 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 	return rest, nil
 }
 
-func decodeLength(data []byte) (length int, rest []byte) {
+func decodeLength(data []byte) (length int, rest []byte, err error) {
 	firstByte := data[0]
 	if firstByte&0x80 != 0 {
 		numToRead := int(firstByte ^ 0x80)
 		if len(data)-1 < numToRead {
-			panic("Can't satisfy request to read " + strconv.Itoa(numToRead) + " bytes to get length")
+			return 0, []byte{}, errors.New("Can't satisfy request to read " +
+				strconv.Itoa(numToRead) + " bytes to get length")
 		}
 		length := 0
 		for i := 0; i < numToRead; i++ {
 			length *= 256
 			length += int(data[1+i])
 		}
-		return length, data[1+numToRead:]
+		return length, data[1+numToRead:], nil
 	} else {
-		return int(firstByte), data[1:]
+		return int(firstByte), data[1:], nil
 	}
 }
 
@@ -295,9 +299,6 @@ func handleString(label string, out *indenter.Indenter, content []byte) {
 }
 
 func handleInteger(label string, out *indenter.Indenter, content []byte) {
-	if len(content) < 1 {
-		panic("Integer in " + label + " had no content")
-	}
 	if len(content) > 0 && len(content) < 8 && content[0]&0x80 == 0 {
 		// conveniently display it
 		value := int64(0)
@@ -309,7 +310,7 @@ func handleInteger(label string, out *indenter.Indenter, content []byte) {
 			}
 		}
 		out.Println(label, value)
-	} else if len(content) > 8 || content[0]&0x80 != 0 {
+	} else if len(content) > 8 || len(content) == 0 || content[0]&0x80 != 0 {
 		// just dump it in hex
 		handleData(label, out, content)
 	}

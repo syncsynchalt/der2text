@@ -1,8 +1,8 @@
 package pem_test
 
 import (
-	. "github.com/syncsynchalt/der2text/pem"
 	"github.com/syncsynchalt/der2text/indenter"
+	. "github.com/syncsynchalt/der2text/pem"
 	"github.com/syncsynchalt/der2text/test"
 	"testing"
 )
@@ -11,11 +11,13 @@ import (
 type stringWriter struct {
 	str string
 }
+
 func (s *stringWriter) Write(p []byte) (n int, err error) {
 	s.str += string(p)
 	return len(p), nil
 }
 
+// helper function used by all tests below
 func testPemData(tb testing.TB, input string, output string) {
 	// run Parse, compare output
 	var parseOut stringWriter

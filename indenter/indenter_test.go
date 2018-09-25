@@ -8,11 +8,12 @@ import (
 
 // an io.Writer that builds a string
 type stringWriter struct {
-    str string
+	str string
 }
+
 func (s *stringWriter) Write(p []byte) (n int, err error) {
-    s.str += string(p)
-    return len(p), nil
+	s.str += string(p)
+	return len(p), nil
 }
 
 func TestIndenterLevelZero(t *testing.T) {

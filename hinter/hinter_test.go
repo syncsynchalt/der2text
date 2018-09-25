@@ -1,18 +1,19 @@
 package hinter
 
 import (
-	"github.com/syncsynchalt/der2text/test"
 	"github.com/syncsynchalt/der2text/indenter"
+	"github.com/syncsynchalt/der2text/test"
 	"testing"
 )
 
 // an io.Writer that builds a string
 type stringWriter struct {
-    str string
+	str string
 }
+
 func (s *stringWriter) Write(p []byte) (n int, err error) {
-    s.str += string(p)
-    return len(p), nil
+	s.str += string(p)
+	return len(p), nil
 }
 
 func TestHinterPercents(t *testing.T) {
