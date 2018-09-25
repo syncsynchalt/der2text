@@ -19,6 +19,9 @@ func (s *stringWriter) Write(p []byte) (n int, err error) {
 
 // helper function used by all tests below
 func testPemData(tb testing.TB, input string, output string) {
+	test.CallerDepth = 2
+	defer func() { test.CallerDepth = 1 }()
+
 	// run Parse, compare output
 	var parseOut stringWriter
 	out := indenter.New(&parseOut)

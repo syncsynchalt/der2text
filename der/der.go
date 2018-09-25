@@ -287,7 +287,7 @@ func handleData(label string, out *indenter.Indenter, content []byte) {
 }
 
 func handleString(label string, out *indenter.Indenter, content []byte) {
-	out.Printf("%s ", label)
+	out.Printf("%s '", label)
 	printString(out, content)
 	out.Print("\n")
 }

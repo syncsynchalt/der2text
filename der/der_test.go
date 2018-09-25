@@ -21,6 +21,9 @@ func (s *stringWriter) Write(p []byte) (n int, err error) {
 
 // helper function used by all tests below
 func testDerOctets(tb testing.TB, inputOctets string, output string) {
+	test.CallerDepth = 2
+	defer func() { test.CallerDepth = 1 }()
+
 	// strip spaces
 	inputOctets = strings.Join(strings.Fields(inputOctets), "")
 
@@ -189,18 +192,18 @@ func TestEmbeddedPDV(t *testing.T) {
 }
 
 func TestUtf8String(t *testing.T) {
-	testDerOctets(t, "0c 00", `UNIVERSAL PRIMITIVE UTF8STRING 
+	testDerOctets(t, "0c 00", `UNIVERSAL PRIMITIVE UTF8STRING '
 `)
-	testDerOctets(t, "0c 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE UTF8STRING hi mom
+	testDerOctets(t, "0c 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE UTF8STRING 'hi mom
 `)
-	testDerOctets(t, "0c 07 68 69 20 6d 6f 6d 0a", `UNIVERSAL PRIMITIVE UTF8STRING hi mom\n
+	testDerOctets(t, "0c 07 68 69 20 6d 6f 6d 0a", `UNIVERSAL PRIMITIVE UTF8STRING 'hi mom\n
 `)
-	testDerOctets(t, "0c 07 68 c3 ad 20 6d 6f 6d", `UNIVERSAL PRIMITIVE UTF8STRING hí mom
+	testDerOctets(t, "0c 07 68 c3 ad 20 6d 6f 6d", `UNIVERSAL PRIMITIVE UTF8STRING 'hí mom
 `)
 }
 
 func TestUtfStringBadUtf8(t *testing.T) {
-	testDerOctets(t, "0c 06 68 ed 20 6d 6f 6d", "UNIVERSAL PRIMITIVE UTF8STRING h\xed mom\n")
+	testDerOctets(t, "0c 06 68 ed 20 6d 6f 6d", "UNIVERSAL PRIMITIVE UTF8STRING 'h\xed mom\n")
 }
 
 func TestRelativeOID(t *testing.T) {
@@ -210,22 +213,22 @@ func TestRelativeOID(t *testing.T) {
 }
 
 func TestNumericString(t *testing.T) {
-	testDerOctets(t, "12 07 31203220332034", `UNIVERSAL PRIMITIVE NUMERICSTRING 1 2 3 4
+	testDerOctets(t, "12 07 31203220332034", `UNIVERSAL PRIMITIVE NUMERICSTRING '1 2 3 4
 `)
-	testDerOctets(t, "12 00", `UNIVERSAL PRIMITIVE NUMERICSTRING 
+	testDerOctets(t, "12 00", `UNIVERSAL PRIMITIVE NUMERICSTRING '
 `)
 }
 
 // strictly speaking, only [0-9 ] are allowed in numericstring
 func TestNumericStringInvalid(t *testing.T) {
-	testDerOctets(t, "12 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE NUMERICSTRING hi mom
+	testDerOctets(t, "12 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE NUMERICSTRING 'hi mom
 `)
 }
 
 func TestPrintableString(t *testing.T) {
-	testDerOctets(t, "13 00", `UNIVERSAL PRIMITIVE PRINTABLESTRING 
+	testDerOctets(t, "13 00", `UNIVERSAL PRIMITIVE PRINTABLESTRING '
 `)
-	testDerOctets(t, "13 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE PRINTABLESTRING hi mom
+	testDerOctets(t, "13 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE PRINTABLESTRING 'hi mom
 `)
 }
 
@@ -246,29 +249,29 @@ func TestVideotextString(t *testing.T) {
 }
 
 func TestIA5String(t *testing.T) {
-	testDerOctets(t, "16 00", `UNIVERSAL PRIMITIVE IA5STRING 
+	testDerOctets(t, "16 00", `UNIVERSAL PRIMITIVE IA5STRING '
 `)
-	testDerOctets(t, "16 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE IA5STRING hi mom
+	testDerOctets(t, "16 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE IA5STRING 'hi mom
 `)
 }
 
 func TestUTCTime(t *testing.T) {
-	testDerOctets(t, "17 00", `UNIVERSAL PRIMITIVE UTCTIME 
+	testDerOctets(t, "17 00", `UNIVERSAL PRIMITIVE UTCTIME '
 `)
-	testDerOctets(t, "17 0B 313830393130 303130325A", `UNIVERSAL PRIMITIVE UTCTIME 1809100102Z
+	testDerOctets(t, "17 0B 313830393130 303130325A", `UNIVERSAL PRIMITIVE UTCTIME '1809100102Z
 `)
-	testDerOctets(t, "17 0D 313830393130 3031303230305A", `UNIVERSAL PRIMITIVE UTCTIME 180910010200Z
+	testDerOctets(t, "17 0D 313830393130 3031303230305A", `UNIVERSAL PRIMITIVE UTCTIME '180910010200Z
 # 2018-09-10 01:02:00 GMT
 `)
 }
 
 func TestGeneralizedTime(t *testing.T) {
-	testDerOctets(t, "18 00", `UNIVERSAL PRIMITIVE GENERALIZEDTIME 
+	testDerOctets(t, "18 00", `UNIVERSAL PRIMITIVE GENERALIZEDTIME '
 `)
-	testDerOctets(t, "18 0F 313830393130 30313032303030305A", `UNIVERSAL PRIMITIVE GENERALIZEDTIME 18091001020000Z
+	testDerOctets(t, "18 0F 313830393130 30313032303030305A", `UNIVERSAL PRIMITIVE GENERALIZEDTIME '18091001020000Z
 `)
 	testDerOctets(t, "18 13 3230303031323331 323335393539 2E 393939 5A",
-		`UNIVERSAL PRIMITIVE GENERALIZEDTIME 20001231235959.999Z
+		`UNIVERSAL PRIMITIVE GENERALIZEDTIME '20001231235959.999Z
 `)
 }
 
@@ -281,15 +284,15 @@ func TestGraphicString(t *testing.T) {
 }
 
 func TestVisibleString(t *testing.T) {
-	testDerOctets(t, "1a 00", `UNIVERSAL PRIMITIVE VISIBLESTRING 
+	testDerOctets(t, "1a 00", `UNIVERSAL PRIMITIVE VISIBLESTRING '
 `)
-	testDerOctets(t, "1a 06 6869206D6F6D", `UNIVERSAL PRIMITIVE VISIBLESTRING hi mom
+	testDerOctets(t, "1a 06 6869206D6F6D", `UNIVERSAL PRIMITIVE VISIBLESTRING 'hi mom
 `)
 }
 
 // non-ascii not allowed but make sure we can round-trip it
 func TestVisibleStringIllegal(t *testing.T) {
-	testDerOctets(t, "1a 06 68ed206D6F6D", "UNIVERSAL PRIMITIVE VISIBLESTRING h\xed mom\n")
+	testDerOctets(t, "1a 06 68ed206D6F6D", "UNIVERSAL PRIMITIVE VISIBLESTRING 'h\xed mom\n")
 }
 
 func TestGeneralString(t *testing.T) {
@@ -301,20 +304,20 @@ func TestGeneralString(t *testing.T) {
 }
 
 func TestUniversalString(t *testing.T) {
-	testDerOctets(t, "1c 00", `UNIVERSAL PRIMITIVE UNIVERSALSTRING 
+	testDerOctets(t, "1c 00", `UNIVERSAL PRIMITIVE UNIVERSALSTRING '
 `)
 	testDerOctets(t, "1C 18 00000068 00000069 00000020 0000006D 0000006F 0000006D",
-		`UNIVERSAL PRIMITIVE UNIVERSALSTRING hi mom
+		`UNIVERSAL PRIMITIVE UNIVERSALSTRING 'hi mom
 `)
 }
 
 // lock behavior down
 func TestUniversalStringIllegal(t *testing.T) {
 	testDerOctets(t, "1C 17 00000068 00000069 00000020 0000006D 0000006F 000000",
-		"UNIVERSAL PRIMITIVE UNIVERSALSTRING hi mo\uFFFD\n")
-	testDerOctets(t, "1C 04 0000ffff", "UNIVERSAL PRIMITIVE UNIVERSALSTRING \uFFFF\n")
-	testDerOctets(t, "1C 04 0000fffe", "UNIVERSAL PRIMITIVE UNIVERSALSTRING \uFFFE\n")
-	testDerOctets(t, "1C 04 0000fffc", "UNIVERSAL PRIMITIVE UNIVERSALSTRING \uFFFC\n")
+		"UNIVERSAL PRIMITIVE UNIVERSALSTRING 'hi mo\uFFFD\n")
+	testDerOctets(t, "1C 04 0000ffff", "UNIVERSAL PRIMITIVE UNIVERSALSTRING '\uFFFF\n")
+	testDerOctets(t, "1C 04 0000fffe", "UNIVERSAL PRIMITIVE UNIVERSALSTRING '\uFFFE\n")
+	testDerOctets(t, "1C 04 0000fffc", "UNIVERSAL PRIMITIVE UNIVERSALSTRING '\uFFFC\n")
 }
 
 func TestCharacterString(t *testing.T) {
@@ -324,21 +327,21 @@ func TestCharacterString(t *testing.T) {
 }
 
 func TestBMPString(t *testing.T) {
-	testDerOctets(t, "1e 00", `UNIVERSAL PRIMITIVE BMPSTRING 
+	testDerOctets(t, "1e 00", `UNIVERSAL PRIMITIVE BMPSTRING '
 `)
 	testDerOctets(t, "1e 0c 0068 0069 0020 006D 006F 006D",
-		`UNIVERSAL PRIMITIVE BMPSTRING hi mom
+		`UNIVERSAL PRIMITIVE BMPSTRING 'hi mom
 `)
 }
 
 // lock behavior down
 func TestBMPStringIllegal(t *testing.T) {
 	testDerOctets(t, "1e 0b 0068 0069 0020 006D 006F 00",
-		"UNIVERSAL PRIMITIVE BMPSTRING hi mo\uFFFD\n")
-	testDerOctets(t, "1e 02 ffff", "UNIVERSAL PRIMITIVE BMPSTRING \uFFFF\n")
-	testDerOctets(t, "1e 02 fffe", "UNIVERSAL PRIMITIVE BMPSTRING \uFFFE\n")
-	testDerOctets(t, "1e 02 fffc", "UNIVERSAL PRIMITIVE BMPSTRING \uFFFC\n")
-	testDerOctets(t, "1e 02 d800", "UNIVERSAL PRIMITIVE BMPSTRING \uFFFD\n")
+		"UNIVERSAL PRIMITIVE BMPSTRING 'hi mo\uFFFD\n")
+	testDerOctets(t, "1e 02 ffff", "UNIVERSAL PRIMITIVE BMPSTRING '\uFFFF\n")
+	testDerOctets(t, "1e 02 fffe", "UNIVERSAL PRIMITIVE BMPSTRING '\uFFFE\n")
+	testDerOctets(t, "1e 02 fffc", "UNIVERSAL PRIMITIVE BMPSTRING '\uFFFC\n")
+	testDerOctets(t, "1e 02 d800", "UNIVERSAL PRIMITIVE BMPSTRING '\uFFFD\n")
 }
 
 func TestSequence(t *testing.T) {
@@ -346,7 +349,7 @@ func TestSequence(t *testing.T) {
 `)
 	testDerOctets(t, "30 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SEQUENCE
   UNIVERSAL PRIMITIVE INTEGER 123
-  UNIVERSAL PRIMITIVE UTF8STRING abc
+  UNIVERSAL PRIMITIVE UTF8STRING 'abc
 `)
 }
 
@@ -355,6 +358,6 @@ func TestSet(t *testing.T) {
 `)
 	testDerOctets(t, "31 08"+"02017B"+"0C03616263", `UNIVERSAL COMPOSED SET
   UNIVERSAL PRIMITIVE INTEGER 123
-  UNIVERSAL PRIMITIVE UTF8STRING abc
+  UNIVERSAL PRIMITIVE UTF8STRING 'abc
 `)
 }
