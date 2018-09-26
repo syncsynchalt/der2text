@@ -2,10 +2,10 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/syncsynchalt/der2text/write/der"
 	"github.com/syncsynchalt/der2text/write/pem"
 	"io"
-	"fmt"
 	"strings"
 )
 

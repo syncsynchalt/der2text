@@ -3,18 +3,9 @@ package hinter
 import (
 	"github.com/syncsynchalt/der2text/read/indenter"
 	"github.com/syncsynchalt/der2text/test"
+	"strings"
 	"testing"
 )
-
-// an io.Writer that builds a string
-type stringWriter struct {
-	str string
-}
-
-func (s *stringWriter) Write(p []byte) (n int, err error) {
-	s.str += string(p)
-	return len(p), nil
-}
 
 func TestHinterPercents(t *testing.T) {
 	test.Equals(t, false, isMostlyPrintable([]byte("")))
@@ -26,30 +17,26 @@ func TestHinterPercents(t *testing.T) {
 }
 
 func TestPrintHintNotPrintable(t *testing.T) {
-	w := &stringWriter{}
+	w := &strings.Builder{}
 	ind := indenter.New(w)
 	PrintHint(ind, []byte("\x10\x11\x12\x13"))
-	test.Equals(t, "", w.str)
+	test.Equals(t, "", w.String())
 }
 
 func TestPrintHintPrintable(t *testing.T) {
-	w := &stringWriter{}
+	w := &strings.Builder{}
 	ind := indenter.New(w)
 	PrintHint(ind, []byte("abc\x00def.\"g"))
 	test.Equals(t, `# data: "abc.def..g"
-`, w.str)
+`, w.String())
 }
 
 // helper function for the below tests
 func hintTime(input string) string {
-	w := &stringWriter{}
+	w := &strings.Builder{}
 	ind := indenter.New(w)
 	PrintTimeHint(ind, []byte(input))
-	if len(w.str) > 0 && w.str[len(w.str)-1] == '\n' {
-		return w.str[:len(w.str)-1]
-	} else {
-		return w.str
-	}
+	return strings.TrimRight(w.String(), "\n")
 }
 
 func TestPrintTimeShort(t *testing.T) {

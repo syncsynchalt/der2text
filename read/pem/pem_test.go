@@ -4,18 +4,9 @@ import (
 	"github.com/syncsynchalt/der2text/read/indenter"
 	. "github.com/syncsynchalt/der2text/read/pem"
 	"github.com/syncsynchalt/der2text/test"
+	"strings"
 	"testing"
 )
-
-// an io.Writer that builds a string
-type stringWriter struct {
-	str string
-}
-
-func (s *stringWriter) Write(p []byte) (n int, err error) {
-	s.str += string(p)
-	return len(p), nil
-}
 
 // helper function used by all tests below
 func testPemData(tb testing.TB, input string, output string) {
@@ -23,14 +14,14 @@ func testPemData(tb testing.TB, input string, output string) {
 	defer func() { test.CallerDepth = 1 }()
 
 	// run Parse, compare output
-	var parseOut stringWriter
+	var parseOut strings.Builder
 	out := indenter.New(&parseOut)
 	err := Parse(out, []byte(input))
 	if err != nil && err.Error() == output {
 		return
 	}
 	test.Ok(tb, err)
-	test.Equals(tb, output, parseOut.str)
+	test.Equals(tb, output, parseOut.String())
 }
 
 func TestEmpty(t *testing.T) {

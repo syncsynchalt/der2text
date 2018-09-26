@@ -9,16 +9,6 @@ import (
 	"testing"
 )
 
-// an io.Writer that builds a string
-type stringWriter struct {
-	str string
-}
-
-func (s *stringWriter) Write(p []byte) (n int, err error) {
-	s.str += string(p)
-	return len(p), nil
-}
-
 // helper function used by all tests below
 func testDerOctets(tb testing.TB, inputOctets string, output string) {
 	test.CallerDepth = 2
@@ -38,14 +28,14 @@ func testDerOctets(tb testing.TB, inputOctets string, output string) {
 	}
 
 	// run Parse, compare output
-	var parseOut stringWriter
+	parseOut := strings.Builder{}
 	out := indenter.New(&parseOut)
 	err := Parse(out, bytes)
 	if err != nil && err.Error() == output {
 		return
 	}
 	test.Ok(tb, err)
-	test.Equals(tb, output, parseOut.str)
+	test.Equals(tb, output, parseOut.String())
 }
 
 func TestEmpty(t *testing.T) {
