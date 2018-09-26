@@ -1,13 +1,14 @@
 all: read
 
 read:
-	go build github.com/syncsynchalt/der2text/cmds/der2text
+	go build ./cmds/...
 
 test:
-	go test github.com/syncsynchalt/der2text/read/...
+	go test ./read/...
+	go test ./write/...
 
 clean:
-	rm -f der2text
+	rm -f der2text text2der
 	go clean -cache
 
 .PHONY: read clean test

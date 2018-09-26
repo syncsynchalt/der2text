@@ -1,6 +1,7 @@
 package der
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/syncsynchalt/der2text/read/hinter"
@@ -269,15 +270,17 @@ func decodeLength(data []byte) (length int, rest []byte, err error) {
 }
 
 func printString(out *indenter.Indenter, content []byte) {
+	bout := bufio.NewWriter(out)
 	for _, v := range content {
 		if v == '\n' {
-			out.Print("\\n")
+			bout.Write([]byte("\\n"))
 		} else if v == '\r' {
-			out.Print("\\r")
+			bout.Write([]byte("\\r"))
 		} else {
-			out.Write([]byte{v})
+			bout.Write([]byte{v})
 		}
 	}
+	bout.Flush()
 }
 
 func handleData(label string, out *indenter.Indenter, content []byte) {
