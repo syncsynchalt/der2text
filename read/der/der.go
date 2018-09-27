@@ -70,12 +70,16 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 	}
 
 	typeByte := data[0]
-	typeTag := typeByte & 0x1F
+	typeTag := int(typeByte & 0x1F)
 	typeConstructed := typeByte & 0x20
 	typeClass := typeByte & 0xC0
+	numBytesInType := 1
 
 	if typeTag == typeIsLongFormTag {
-		return nil, errors.New("Long form DER types not implemented")
+		typeTag, numBytesInType, err = readLongType(data)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	switch typeClass {
@@ -96,7 +100,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		out.Print("CONSTRUCTED ")
 	}
 
-	contentLen, rest, err := decodeLength(data[1:])
+	contentLen, rest, err := decodeLength(data[numBytesInType:])
 	if err != nil {
 		return nil, err
 	}
@@ -243,11 +247,26 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		}
 		handleString("BMPSTRING", out, b)
 	default:
-		label := fmt.Sprintf("UNHANDLED-TAG=%02x", typeTag)
+		label := fmt.Sprintf("UNHANDLED-TAG=%d", typeTag)
 		handleData(label, out, content)
 	}
 
 	return rest, nil
+}
+
+func readLongType(data []byte) (tag int, numBytesEncoded int, err error) {
+	if data[0] & 0x1F != 0x1F {
+		panic("readLongType was passed a non-long type")
+	}
+	var result, i int
+	for i = 1; i < len(data); i++ {
+		result = result << 7
+		result += int(data[i] & 0x7f)
+		if data[i] & 0x80 == 0 {
+			return result, i+1, nil
+		}
+	}
+	return 0, 0, errors.New("ran out of bytes while reading long type tag")
 }
 
 func decodeLength(data []byte) (length int, rest []byte, err error) {

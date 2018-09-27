@@ -73,7 +73,7 @@ machine-parseable.  The format is:
    * `UNIVERSALSTRING` (UTF-32BE string) followed by content data
    * `CHARACTERSTRING` followed by content data
    * `BMPSTRING` (UTF-16BE string) followed by content data
-   * `UNHANDLED-TAG=xx` followed by content data
+   * `UNHANDLED-TAG=nn` followed by content data
       * This represents a type that we can't show in a human-readable way without some knowledge of the ASN.1 schema.  This data is preserved but may be opaque to our desire to edit it.
 
 In the above list, "content data" consists of either:

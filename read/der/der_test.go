@@ -111,7 +111,7 @@ func TestBitstringBadInputs(t *testing.T) {
 
 // currently not well handled by the util, but usable
 func TestBitstringComposed(t *testing.T) {
-	testDerOctets(t, "23 09  03 03 00 6e 5d  03 02 06 c0", `UNIVERSAL CONSTRUCTED UNHANDLED-TAG=03 :0303006E5D030206C0
+	testDerOctets(t, "23 09  03 03 00 6e 5d  03 02 06 c0", `UNIVERSAL CONSTRUCTED UNHANDLED-TAG=3 :0303006E5D030206C0
 `)
 }
 
@@ -351,5 +351,10 @@ func TestSet(t *testing.T) {
 	testDerOctets(t, "31 08"+"02017B"+"0C03616263", `UNIVERSAL CONSTRUCTED SET
   UNIVERSAL PRIMITIVE INTEGER 123
   UNIVERSAL PRIMITIVE UTF8STRING 'abc
+`)
+}
+
+func TestLongTypeTag(t *testing.T) {
+	testDerOctets(t, "5f 87 67 03 01 02 03", `APPLICATION PRIMITIVE UNHANDLED-TAG=999 :010203
 `)
 }

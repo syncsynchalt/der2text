@@ -37,8 +37,12 @@ produces a more readable output on stdout`, os.Args[0])
 	}
 
 	if len(data) > 11 && string(data[:11]) == "-----BEGIN " {
-		pem.Parse(indenter.New(os.Stdout), data)
+		err = pem.Parse(indenter.New(os.Stdout), data)
 	} else {
-		der.Parse(indenter.New(os.Stdout), data)
+		err = der.Parse(indenter.New(os.Stdout), data)
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
 	}
 }

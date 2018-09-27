@@ -5,16 +5,18 @@ all:
 test:
 	go test ./read/...
 	go test ./write/...
-	@for i in $$(ls samples/* | grep -v README); do \
+	@result=0; \
+	for i in $$(ls samples/* | grep -v README); do \
 		echo "=== $$i"; \
 		./der2text $$i | ./text2der > /tmp/t.$$; \
 		cmp $$i /tmp/t.$$; \
 		if [ "$$?" != "0" ]; then \
 			echo "Failure in file $$i" 1>&2; \
-			exit 1; \
+			result=1; \
 		fi; \
 		rm -f /tmp/t.$$; \
-	done
+	done; \
+	exit $$result
 
 clean:
 	rm -f der2text text2der
