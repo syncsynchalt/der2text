@@ -38,16 +38,16 @@ text2der /path/to/der2text/output
 This file is meant to be human readable and editable but also easily
 machine-parseable.  The format is:
 
-1. Lines consisting of zero or more spaces followed by "#" followed by data are ignored by machines
+1. Blank lines or lines consisting of zero or more spaces followed by "#" followed by data are ignored by machines
 2. The first line may consist of the words `PEM ENCODED {FOO}` where `{FOO}` is one of `CERTIFICATE`, `CERTIFICATE REQUEST`, `PRIVATE KEY`, and so on.  This indicates a PEM wrapper of type `{FOO}`.
-3. Indentation of more than zero spaces indicate the depth of the containing set or sequence, and are defined in terms of 2*level (e.g. 4 spaces indicates the data is in two levels of set or sequence)
+3. Indentation with spaces indicate the items that are contained within the a preceding `SET` or `SEQUENCE`.  For example a `SET` that occurs with an indentation of two spaces will contain all immediately following lines indented by three or more spaces.
 4. After indentation, the first word `UNIVERSAL`, `APPLICATION`, `CONTEXT-SPECIFIC`, or `PRIVATE` indicates the ASN.1 type class.  As a rule this utility can only make types of class `UNIVERSAL` human-readable but will preserve data for all other types and classes found.
-5. After class, the word `PRIMITIVE` or `CONSTRUCTED` indicates the ASN.1 type flag of primitive (content represents this single type) vs constructed (content contains multiple elements that can themselves be individual type-length-content datums).
-    * In the case of types which can be either primitive or constructed this utility takes the opinionated stance of only representing the primitive type in human-readable form (this is also constrained by DER encoding rules in most cases).  In all cases data is preserved whether primitive or constructed.
+5. After class, the word `PRIMITIVE` or `CONSTRUCTED` indicates the ASN.1 type flag of primitive (content represents this single type) vs constructed (content contains multiple elements).
+    * In the case of types which can be either primitive or constructed this utility takes the opinionated stance of only representing the primitive type in human-readable form (this is also enforced by DER encoding rules in most cases).  In all cases data is preserved whether primitive or constructed.
 6. After primitive/constructed flag, the ASN.1 type tag is listed as below:
    * `END-OF-CONTENT` followed by nothing
-   * `INTEGER` followed by the number or content data
-   * `BITSTRING1` followed by `PAD=n` of right padding amount followed by content data
+   * `INTEGER` followed by the number or by content data
+   * `BITSTRING` followed by `PAD=n` of right padding amount (0-7 bits) followed by content data
    * `OCTETSTRING` followed by content data
    * `NULL` followed by nothing
    * `OID` followed by an ASN.1 object identifier
