@@ -32,12 +32,13 @@ func Parse(lines []SourceLine) ([]byte, error) {
 	for lineno < len(lines) {
 		line := lines[lineno]
 		if line.IsComment() {
+			lineno += 1
 			continue
 		}
 
 		result, handled, err := parseLine(lines, lineno)
 		if err != nil {
-			return nil, fmt.Errorf("line %d: %s", lineno, err.Error())
+			return nil, fmt.Errorf("line %d: %s", lineno+1, err.Error())
 		}
 		out = append(out, result...)
 		lineno += handled
@@ -78,7 +79,27 @@ func parseLine(lines []SourceLine, lineno int) (result []byte, handled int, err 
 	}
 
 	var data []byte
+
+	if len(typ) > 14 && typ[:14] == "UNHANDLED-TAG=" {
+		payload, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteGeneric(class, construction, typ, payload)
+		return data, 1, err
+	}
+
 	switch typ {
+	case "END-OF-CONTENT":
+		data, err := der.WriteEndOfContent(class, construction, typ)
+		return data, 1, err
+	case "BOOLEAN":
+		value, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err := der.WriteBoolean(class, construction, typ, value)
+		return data, 1, err
 	case "INTEGER", "ENUMERATED":
 		tokenType := line.NextTokenType()
 		token, err := line.NextToken()
@@ -86,10 +107,62 @@ func parseLine(lines []SourceLine, lineno int) (result []byte, handled int, err 
 			return nil, 0, err
 		}
 		if tokenType == "OCTETS" {
-			data, err = der.WriteIntegerPreserved(class, construction, typ, token)
+			data, err = der.WriteGeneric(class, construction, typ, token)
 		} else {
 			data, err = der.WriteInteger(class, construction, typ, token)
 		}
+		return data, 1, err
+	case "BITSTRING":
+		padding, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		payload, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteBitstring(class, construction, typ, padding, payload)
+		return data, 1, err
+	case "NULL":
+		data, err = der.WriteNull(class, construction, typ)
+		return data, 1, err
+	case "OID":
+		oid, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteOid(class, construction, typ, oid)
+		return data, 1, err
+	case "RELATIVEOID":
+		oid, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteRelativeOid(class, construction, typ, oid)
+		return data, 1, err
+	case "UNIVERSALSTRING":
+		str, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteUniversalString(class, construction, typ, str)
+		return data, 1, err
+	case "BMPSTRING":
+		str, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteBMPString(class, construction, typ, str)
+		return data, 1, err
+	case "OCTETSTRING", "OBJECTDESCRIPTION", "EXTERNAL", "REAL", "EMBEDDED-PDV", "UTF8STRING",
+		"NUMERICSTRING", "PRINTABLESTRING", "T61STRING", "VIDEOTEXSTRING", "IA5STRING", "UTCTIME",
+		"GENERALIZEDTIME", "GRAPHICSTRING", "VISIBLESTRING", "GENERALSTRING", "CHARACTERSTRING":
+		// no special handling on these types, they're just bare payload for now
+		payload, err := line.NextToken()
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteGeneric(class, construction, typ, payload)
 		return data, 1, err
 	default:
 		return nil, 0, fmt.Errorf("Unrecognized type %s", typ)
