@@ -10,9 +10,9 @@ func TestSourceLineIndent(t *testing.T) {
 	test.Equals(t, 0, SourceLine{Str: ""}.IndentLevel())
 	test.Equals(t, 0, SourceLine{Str: "abc"}.IndentLevel())
 	test.Equals(t, 0, SourceLine{Str: "abc  "}.IndentLevel())
-	test.Equals(t, 0, SourceLine{Str: " abc"}.IndentLevel())
-	test.Equals(t, 1, SourceLine{Str: "  abc"}.IndentLevel())
-	test.Equals(t, 2, SourceLine{Str: "    abc"}.IndentLevel())
+	test.Equals(t, 1, SourceLine{Str: " abc"}.IndentLevel())
+	test.Equals(t, 2, SourceLine{Str: "  abc"}.IndentLevel())
+	test.Equals(t, 4, SourceLine{Str: "    abc"}.IndentLevel())
 
 }
 
@@ -123,4 +123,52 @@ func TestSourceLineTokenType(t *testing.T) {
 
 	line = SourceLine{Str: "      :"}
 	test.Equals(t, "OCTETS", line.NextTokenType())
+}
+
+func TestSliceHigherIndentsEmpty(t *testing.T) {
+	l := []SourceLine{}
+	e := []SourceLine{}
+	r := SliceHigherIndents(l, 10)
+	test.Equals(t, e, r)
+}
+
+func TestSliceHigherIndentsEndsMid(t *testing.T) {
+	l := []SourceLine{
+		{Str: "  abc"},
+		{Str: "  def"},
+		{Str: "   gh"},
+		{Str: "  abc"},
+		{Str: " abc"},
+	}
+	e := []SourceLine{
+		{Str: "  abc"},
+		{Str: "  def"},
+		{Str: "   gh"},
+		{Str: "  abc"},
+	}
+	r := SliceHigherIndents(l, 1)
+	test.Equals(t, e, r)
+}
+
+func TestSliceHigherIndentsNone(t *testing.T) {
+	l := []SourceLine{
+		{Str: "  abc"},
+		{Str: "  def"},
+	}
+	e := []SourceLine{}
+	r := SliceHigherIndents(l, 2)
+	test.Equals(t, e, r)
+}
+
+func TestSliceHigherIndentsEndsEnd(t *testing.T) {
+	l := []SourceLine{
+		{Str: "  abc"},
+		{Str: "  def"},
+	}
+	e := []SourceLine{
+		{Str: "  abc"},
+		{Str: "  def"},
+	}
+	r := SliceHigherIndents(l, 1)
+	test.Equals(t, e, r)
 }

@@ -10,11 +10,7 @@ type SourceLine struct {
 }
 
 func (s SourceLine) IndentLevel() int {
-	i := 0
-	for i < len(s.Str) && s.Str[i] == ' ' {
-		i++
-	}
-	return i / 2
+	return len(s.Str) - len(strings.TrimLeft(s.Str, " "))
 }
 
 func (s SourceLine) IsComment() bool {
@@ -73,4 +69,13 @@ func (s SourceLine) NextTokenType() string {
 	default:
 		return "ATOM"
 	}
+}
+
+// return slice of the elements at the head of lines that have an indent level higher than indent
+func SliceHigherIndents(lines []SourceLine, indent int) []SourceLine {
+	i := 0
+	for i < len(lines) && lines[i].IndentLevel() > indent {
+		i++
+	}
+	return lines[:i]
 }

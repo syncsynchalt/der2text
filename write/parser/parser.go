@@ -164,6 +164,14 @@ func parseLine(lines []SourceLine, lineno int) (result []byte, handled int, err 
 		}
 		data, err = der.WriteGeneric(class, construction, typ, payload)
 		return data, 1, err
+	case "SET", "SEQUENCE":
+		innerLines := SliceHigherIndents(lines[lineno+1:], orig.IndentLevel())
+		payload, err := Parse(innerLines)
+		if err != nil {
+			return nil, 0, err
+		}
+		data, err = der.WriteGeneric(class, construction, typ, string(payload))
+		return data, len(innerLines) + 1, err
 	default:
 		return nil, 0, fmt.Errorf("Unrecognized type %s", typ)
 	}

@@ -121,3 +121,18 @@ UNIVERSAL PRIMITIVE BMPSTRING 'b
 	test.Ok(t, err)
 	test.Equals(t, []byte("\x1C\x04\x00\x00\x00a\x1E\x02\x00b"), out)
 }
+
+func TestParseTypesSetSeq(t *testing.T) {
+	instr := `#
+UNIVERSAL CONSTRUCTED SET
+  UNIVERSAL CONSTRUCTED SEQUENCE
+    UNIVERSAL PRIMITIVE NULL
+  UNIVERSAL PRIMITIVE END-OF-CONTENT
+UNIVERSAL PRIMITIVE INTEGER 1
+`
+	lines, err := Lines(strings.NewReader(instr))
+	test.Ok(t, err)
+	out, err := Parse(lines)
+	test.Ok(t, err)
+	test.Equals(t, []byte("\x31\x06\x30\x02\x05\x00\x00\x00\x02\x01\x01"), out)
+}

@@ -1,7 +1,8 @@
 all: read
 
 read:
-	go build ./cmds/...
+	go build ./cmds/der2text
+	go build ./cmds/text2der
 
 test:
 	go test ./read/...
