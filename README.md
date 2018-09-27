@@ -21,6 +21,17 @@ go get github.com/syncsynchalt/der2text/cmds/der2text
 der2text /path/to/cert.pem
 ```
 
+### text2der utility
+
+Reads the "interim format" output of `der2text` and creates PEM- or DER-encoded data from it.
+
+Usage:
+```
+go get github.com/syncsynchalt/der2text/cmds/text2der
+# add ~/go/bin/ to your $PATH
+text2der /path/to/der2text/output
+```
+
 ### interim format
 
 `der2text` produces an interim text file for input to `text2der`.
@@ -73,14 +84,3 @@ In the above list, "content data" consists of either:
    * carriage returns are converted to `\r`
 
 It is best to treat this data as ephemeral in case the format changes in the future.  In other words, keep data in PEM or DER form and convert it at the time that the changes should be made, then put it back in PEM or DER form for storage.
-
-### text2der utility
-
-Reads the "interim format" output of `der2text` and creates PEM- or DER-encoded data from it.
-
-Usage:
-```
-go get github.com/syncsynchalt/der2text/cmds/text2der
-# add ~/go/bin/ to your $PATH
-text2der /path/to/der2text/output
-```
