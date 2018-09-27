@@ -1,15 +1,27 @@
 # der2text
 
-Reads PEM or DER-encoded input and produces a readable and editable output.
+Convert a PEM- or DER-encoded file to a human- and machine-readable form.  This form can be edited and fed into the reverse process to create an edited file.  If signed attributes are modified then the signature will be invalid.
+
+This is useful for inspection and understanding of cryptographic data, and for setting up tests that need specific forms of cryptographic input (e.g. creating unusual or malformed certificates).
+
+In all cases, assuming the file is in PEM- or DER- format, the following round-trip process should produce output identical to input:
+
+```
+cat input | der2text | text2der > output
+```
+
+### der2text utility
+
+Reads PEM- or DER-encoded input and produces a readable and editable output.
 
 Usage:
 ```
 go get github.com/syncsynchalt/der2text/cmds/der2text
 # add ~/go/bin/ to your $PATH
-cat /path/to/cert.pem | der2text
+der2text /path/to/cert.pem
 ```
 
-# interim format
+### interim format
 
 `der2text` produces an interim text file for input to `text2der`.
 This file is meant to be human readable and editable but also easily
@@ -59,3 +71,16 @@ In the above list, "content data" consists of either:
 * the character `'` followed by the data terminated by a newline.  The data has been modified as below:
    * newlines are converted to `\n`
    * carriage returns are converted to `\r`
+
+It is best to treat this data as ephemeral in case the format changes in the future.  In other words, keep data in PEM or DER form and convert it at the time that the changes should be made, then put it back in PEM or DER form for storage.
+
+### text2der utility
+
+Reads the "interim format" output of `der2text` and creates PEM- or DER-encoded data from it.
+
+Usage:
+```
+go get github.com/syncsynchalt/der2text/cmds/text2der
+# add ~/go/bin/ to your $PATH
+text2der /path/to/der2text/output
+```
