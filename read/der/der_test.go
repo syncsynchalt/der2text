@@ -122,7 +122,7 @@ func TestOctetString(t *testing.T) {
 
 func TestOctetStringHinted(t *testing.T) {
 	testDerOctets(t, "04 08 6869206D6F6D FFFF", `UNIVERSAL PRIMITIVE OCTETSTRING :6869206D6F6DFFFF
-# data: "hi mom.."
+# strings: "hi mom.."
 `)
 }
 
@@ -161,11 +161,11 @@ func TestReal(t *testing.T) {
 `)
 	// -0 base 10
 	testDerOctets(t, "09 03 01 2D 30", `UNIVERSAL PRIMITIVE REAL :012D30
-# data: ".-0"
+# strings: ".-0"
 `)
 	// 3.14 base 10
 	testDerOctets(t, "09 08 03 33 31 34 2E 45 2D 32", `UNIVERSAL PRIMITIVE REAL :033331342E452D32
-# data: ".314.E-2"
+# strings: ".314.E-2"
 `)
 }
 
@@ -226,7 +226,7 @@ func TestT61String(t *testing.T) {
 	testDerOctets(t, "14 00", `UNIVERSAL PRIMITIVE T61STRING :
 `)
 	testDerOctets(t, "14 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE T61STRING :6869206D6F6D
-# data: "hi mom"
+# strings: "hi mom"
 `)
 }
 
@@ -234,7 +234,7 @@ func TestVideotextString(t *testing.T) {
 	testDerOctets(t, "15 00", `UNIVERSAL PRIMITIVE VIDEOTEXSTRING :
 `)
 	testDerOctets(t, "15 06 68 69 20 6d 6f 6d", `UNIVERSAL PRIMITIVE VIDEOTEXSTRING :6869206D6F6D
-# data: "hi mom"
+# strings: "hi mom"
 `)
 }
 
@@ -271,7 +271,7 @@ func TestGraphicString(t *testing.T) {
 	testDerOctets(t, "19 00", `UNIVERSAL PRIMITIVE GRAPHICSTRING :
 `)
 	testDerOctets(t, "19 06 6869206D6F6D", `UNIVERSAL PRIMITIVE GRAPHICSTRING :6869206D6F6D
-# data: "hi mom"
+# strings: "hi mom"
 `)
 }
 
@@ -291,7 +291,7 @@ func TestGeneralString(t *testing.T) {
 	testDerOctets(t, "1b 00", `UNIVERSAL PRIMITIVE GENERALSTRING :
 `)
 	testDerOctets(t, "1b 06 6869206D6F6D", `UNIVERSAL PRIMITIVE GENERALSTRING :6869206D6F6D
-# data: "hi mom"
+# strings: "hi mom"
 `)
 }
 
@@ -314,7 +314,7 @@ func TestUniversalStringIllegal(t *testing.T) {
 
 func TestCharacterString(t *testing.T) {
 	testDerOctets(t, "1D 06 6869206D6F6D", `UNIVERSAL PRIMITIVE CHARACTERSTRING :6869206D6F6D
-# data: "hi mom"
+# strings: "hi mom"
 `)
 }
 

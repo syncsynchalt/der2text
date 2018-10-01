@@ -16,18 +16,18 @@ func TestHinterPercents(t *testing.T) {
 	test.Equals(t, true, isMostlyPrintable([]byte("abcdef\x00\x01\x02\x03\x04")))
 }
 
-func TestPrintHintNotPrintable(t *testing.T) {
+func TestPrintStringsNotPrintable(t *testing.T) {
 	w := &strings.Builder{}
 	ind := indenter.New(w)
-	PrintHint(ind, []byte("\x10\x11\x12\x13"))
+	PrintStrings(ind, []byte("\x10\x11\x12\x13"))
 	test.Equals(t, "", w.String())
 }
 
-func TestPrintHintPrintable(t *testing.T) {
+func TestPrintStringsPrintable(t *testing.T) {
 	w := &strings.Builder{}
 	ind := indenter.New(w)
-	PrintHint(ind, []byte("abc\x00def.\"g"))
-	test.Equals(t, `# data: "abc.def..g"
+	PrintStrings(ind, []byte("abc\x00def.\"g"))
+	test.Equals(t, `# strings: "abc.def..g"
 `, w.String())
 }
 

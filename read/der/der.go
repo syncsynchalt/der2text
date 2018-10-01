@@ -306,7 +306,7 @@ func handleData(label string, out *indenter.Indenter, content []byte) {
 	out.Printf("%s ", label)
 	printOctets(out, content)
 	out.Print("\n")
-	hinter.PrintHint(out, content)
+	hinter.PrintStrings(out, content)
 }
 
 func handleString(label string, out *indenter.Indenter, content []byte) {
