@@ -255,15 +255,15 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 }
 
 func readLongType(data []byte) (tag int, numBytesEncoded int, err error) {
-	if data[0] & 0x1F != 0x1F {
+	if data[0]&0x1F != 0x1F {
 		panic("readLongType was passed a non-long type")
 	}
 	var result, i int
 	for i = 1; i < len(data); i++ {
 		result = result << 7
 		result += int(data[i] & 0x7f)
-		if data[i] & 0x80 == 0 {
-			return result, i+1, nil
+		if data[i]&0x80 == 0 {
+			return result, i + 1, nil
 		}
 	}
 	return 0, 0, errors.New("ran out of bytes while reading long type tag")
