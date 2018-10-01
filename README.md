@@ -1,8 +1,8 @@
 # der2text
 
-Convert a PEM- or DER-encoded file to a human- and machine-readable form.  This form can be edited and fed into the reverse process to create an edited file.  If signed attributes are modified then the signature will be invalid.
+Convert a PEM- or DER-encoded file to a human- and machine-readable form.  This form can be edited and fed into the reverse process to create an edited PEM or DER file.
 
-This is useful for inspection and understanding of cryptographic data, and for setting up tests that need specific forms of cryptographic input (e.g. creating unusual or malformed certificates).
+This is useful for inspection and understanding of cryptographic data and for setting up tests that need specific forms of cryptographic input (e.g. creating unusual or malformed certificates).
 
 In all cases, assuming the file is in PEM- or DER- format, the following round-trip process should produce output identical to input:
 
@@ -38,13 +38,13 @@ text2der /path/to/der2text/output
 This file is meant to be human readable and editable but also easily
 machine-parseable.  The format is:
 
-1. Blank lines or lines consisting of zero or more spaces followed by "#" followed by data are ignored by machines
-2. The first line may consist of the words `PEM ENCODED {FOO}` where `{FOO}` is one of `CERTIFICATE`, `CERTIFICATE REQUEST`, `PRIVATE KEY`, and so on.  This indicates a PEM wrapper of type `{FOO}`.
-3. Indentation with spaces indicate the items that are contained within the a preceding `SET` or `SEQUENCE`.  For example a `SET` that occurs with an indentation of two spaces will contain all immediately following lines indented by three or more spaces.
-4. After indentation, the first word `UNIVERSAL`, `APPLICATION`, `CONTEXT-SPECIFIC`, or `PRIVATE` indicates the ASN.1 type class.  As a rule this utility can only make types of class `UNIVERSAL` human-readable but will preserve data for all other types and classes found.
-5. After class, the word `PRIMITIVE` or `CONSTRUCTED` indicates the ASN.1 type flag of primitive (content represents this single type) vs constructed (content contains multiple elements).
-    * In the case of types which can be either primitive or constructed this utility takes the opinionated stance of only representing the primitive type in human-readable form (this is also enforced by DER encoding rules in most cases).  In all cases data is preserved whether primitive or constructed.
-6. After primitive/constructed flag, the ASN.1 type tag is listed as below:
+1. Blank lines or lines consisting of zero or more spaces followed by "#" are ignored
+2. The first line may consist of the words `PEM ENCODED {FOO}` where `{FOO}` is `CERTIFICATE`, `CERTIFICATE REQUEST`, `PRIVATE KEY`, and so on.  This indicates a PEM wrapper of type `{FOO}`.
+3. Indentation with spaces indicate the items that are contained within a preceding `SET` or `SEQUENCE` or `PEM ENCODING`.  For example a `SET` that occurs with an indentation of two spaces will contain all immediately following lines indented by more than two spaces.
+4. After indentation, the first word `UNIVERSAL`, `APPLICATION`, `CONTEXT-SPECIFIC`, or `PRIVATE` indicates the ASN.1 type class.  This utility can only make types of class `UNIVERSAL` human-readable but will preserve data for all other types found.
+5. After type class the word `PRIMITIVE` or `CONSTRUCTED` indicates the ASN.1 type flag of primitive (content represents this single type) vs constructed (content contains multiple elements).
+    * In the case of types which can be either primitive or constructed this utility only represents the primitive type in human-readable form.  This is also enforced by DER encoding rules in most cases.  In all cases the data is preserved whether primitive or constructed.
+6. After primitive/constructed flag, the ASN.1 type tag and element content is as below:
    * `END-OF-CONTENT` followed by nothing
    * `INTEGER` followed by the number or by content data
    * `BITSTRING` followed by `PAD=n` of right padding amount (0-7 bits) followed by content data
