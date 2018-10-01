@@ -4,6 +4,7 @@ package hinter
 
 import (
 	"github.com/syncsynchalt/der2text/read/indenter"
+	"github.com/syncsynchalt/der2text/read/oids"
 	"strconv"
 	"strings"
 )
@@ -76,4 +77,11 @@ func PrintTimeHint(out *indenter.Indenter, content []byte) {
 		return
 	}
 	out.Printf("# %s-%s-%s %s:%s:%s%s%s\n", y, m, d, hh, mm, ss, msecs, tz)
+}
+
+func PrintOidName(out *indenter.Indenter, oid string) {
+	oidHint := oids.Name(oid)
+	if oidHint != "" {
+		out.Println("#", oidHint)
+	}
 }

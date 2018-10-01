@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/syncsynchalt/der2text/read/hinter"
 	"github.com/syncsynchalt/der2text/read/indenter"
-	"github.com/syncsynchalt/der2text/read/oids"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/encoding/unicode/utf32"
 	"strconv"
@@ -163,10 +162,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 			}
 		}
 		out.Println("OID", oid)
-		oidHint := oids.Name(oid)
-		if oidHint != "" {
-			out.Println("#", oidHint)
-		}
+		hinter.PrintOidName(out, oid)
 	case typeObjectDescription | primitive:
 		handleData("OBJECTDESCRIPTION", out, content)
 	case typeExternal | constructed:
@@ -195,10 +191,7 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		}
 		oid = oid[1:]
 		out.Println("RELATIVEOID", oid)
-		oidHint := oids.Name(oid)
-		if oidHint != "" {
-			out.Println("#", oidHint)
-		}
+		hinter.PrintOidName(out, oid)
 	case typeNumericString | primitive:
 		handleString("NUMERICSTRING", out, content)
 	case typePrintableString | primitive:
