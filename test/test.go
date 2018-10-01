@@ -12,15 +12,6 @@ import (
 
 var CallerDepth = 1
 
-// assert fails the test if the condition is false.
-func Assert(tb testing.TB, condition bool, msg string, v ...interface{}) {
-	if !condition {
-		_, file, line, _ := runtime.Caller(CallerDepth)
-		fmt.Printf("\033[31m%s:%d: "+msg+"\033[39m\n\n", append([]interface{}{filepath.Base(file), line}, v...)...)
-		tb.FailNow()
-	}
-}
-
 // ok fails the test if an err is not nil.
 func Ok(tb testing.TB, err error) {
 	if err != nil {
