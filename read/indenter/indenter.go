@@ -9,6 +9,7 @@ import (
 )
 
 type Indenter struct {
+	// last character printed as a "\n"
 	atEos  bool
 	level  int
 	writer io.Writer
