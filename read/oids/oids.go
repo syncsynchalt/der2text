@@ -17,6 +17,7 @@ var oids map[string]string = map[string]string{
 	"2.5.4.20":              "TelephoneNumber",
 	"2.5.4.42":              "GivenName",
 	"2.5.4.43":              "Initials",
+	"1.3.101.110":           "x25519",
 	"1.2.840.113549.1.1.1":  "RSA Encryption",
 	"1.2.840.113549.1.1.11": "Sha256WithRSAEncryption",
 	"1.2.840.113549.1.9.1":  "Email",
