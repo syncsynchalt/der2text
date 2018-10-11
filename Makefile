@@ -2,6 +2,9 @@ all:
 	go build ./cmds/der2text
 	go build ./cmds/text2der
 
+deps:
+	go get golang.org/x/text/encoding/unicode
+
 test:
 	go test ./read/...
 	go test ./write/...

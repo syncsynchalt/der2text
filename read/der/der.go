@@ -320,7 +320,7 @@ func handleInteger(label string, out *indenter.Indenter, content []byte) {
 			}
 		}
 		out.Println(label, value)
-	} else if len(content) > 8 || len(content) == 0 || content[0]&0x80 != 0 {
+	} else if len(content) >= 8 || len(content) == 0 || content[0]&0x80 != 0 {
 		// just dump it in hex
 		handleData(label, out, content)
 	}

@@ -16,6 +16,7 @@ Reads PEM- or DER-encoded input and produces a readable and editable output.
 
 Usage:
 ```
+go get golang.org/x/text/encoding/unicode
 go get github.com/syncsynchalt/der2text/cmds/der2text
 # add ~/go/bin/ to your $PATH
 der2text /path/to/cert.pem
