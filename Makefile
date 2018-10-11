@@ -2,6 +2,10 @@ all:
 	go build ./cmds/der2text
 	go build ./cmds/text2der
 
+install:
+	go get ./cmds/der2text
+	go get ./cmds/text2der
+
 deps:
 	go get golang.org/x/text/encoding/unicode
 
