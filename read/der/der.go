@@ -240,8 +240,13 @@ func parseElement(out *indenter.Indenter, data []byte) (rest []byte, err error) 
 		}
 		handleString("BMPSTRING", out, b)
 	default:
-		label := fmt.Sprintf("UNHANDLED-TAG=%d", typeTag)
-		handleData(label, out, content)
+		if typeConstructed == constructed {
+			out.Printf("UNHANDLED-TAG=%d\n", typeTag)
+			Parse(out.NextLevel(), content)
+		} else {
+			label := fmt.Sprintf("UNHANDLED-TAG=%d", typeTag)
+			handleData(label, out, content)
+		}
 	}
 
 	return rest, nil

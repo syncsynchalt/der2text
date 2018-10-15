@@ -28,7 +28,7 @@ func TestDerBoolean(t *testing.T) {
 
 	data, err = WriteBoolean(u, p, "BOOLEAN", "TRUE")
 	test.Ok(t, err)
-	test.Equals(t, b("\x01\x01\x01"), data)
+	test.Equals(t, b("\x01\x01\xff"), data)
 
 	data, err = WriteBoolean(u, p, "BOOLEAN", "false")
 	test.Equals(t, "unrecognized boolean value false", err.Error())

@@ -16,7 +16,7 @@ func WriteEndOfContent(class, constructed, typ string) ([]byte, error) {
 func WriteBoolean(class, constructed, typ, value string) ([]byte, error) {
 	switch value {
 	case "TRUE":
-		return makeDer(class, constructed, typ, []byte{0x01})
+		return makeDer(class, constructed, typ, []byte{0xff})
 	case "FALSE":
 		return makeDer(class, constructed, typ, []byte{0x00})
 	default:

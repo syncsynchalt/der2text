@@ -41,7 +41,7 @@ machine-parseable.  The format is:
 
 1. Blank lines or lines consisting of zero or more spaces followed by "#" are ignored
 2. The first line may consist of the words `PEM ENCODED {FOO}` where `{FOO}` is `CERTIFICATE`, `CERTIFICATE REQUEST`, `PRIVATE KEY`, and so on.  This indicates a PEM wrapper of type `{FOO}`.
-3. Indentation with spaces indicate the items that are contained within a preceding `SET` or `SEQUENCE` or `PEM ENCODING`.  For example a `SET` that occurs with an indentation of two spaces will contain all immediately following lines indented by more than two spaces.
+3. Indentation with spaces indicate the items that are contained within a preceding `CONSTRUCTED` type or `PEM ENCODING`.  For example a `CONSTRUCTED SET` that occurs with an indentation of two spaces will contain all immediately following lines indented by more than two spaces.
 4. After indentation, the first word `UNIVERSAL`, `APPLICATION`, `CONTEXT-SPECIFIC`, or `PRIVATE` indicates the ASN.1 type class.  This utility can only make types of class `UNIVERSAL` human-readable but will preserve data for all other types found.
 5. After type class the word `PRIMITIVE` or `CONSTRUCTED` indicates the ASN.1 type flag of primitive (content represents this single type) vs constructed (content contains multiple elements).
     * In the case of types which can be either primitive or constructed this utility only represents the primitive type in human-readable form.  This is also enforced by DER encoding rules in most cases.  In all cases the data is preserved whether primitive or constructed.
@@ -76,6 +76,7 @@ machine-parseable.  The format is:
    * `BMPSTRING` (UTF-16BE string) followed by content data
    * `UNHANDLED-TAG=nn` followed by content data
       * This represents a type that we can't show in a human-readable way without some knowledge of the ASN.1 schema.  This data is preserved but may be opaque to our desire to edit it.
+      * If the construction is `CONSTRUCTED` then the content data will be parsed as DER data
 
 In the above list, "content data" consists of either:
 

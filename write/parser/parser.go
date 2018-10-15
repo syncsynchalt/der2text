@@ -81,12 +81,24 @@ func parseLine(lines []SourceLine, lineno int) (result []byte, handled int, err 
 	var data []byte
 
 	if len(typ) > 14 && typ[:14] == "UNHANDLED-TAG=" {
-		payload, err := line.NextToken()
-		if err != nil {
-			return nil, 0, err
+		if construction == "PRIMITIVE" {
+			payload, err := line.NextToken()
+			if err != nil {
+				return nil, 0, err
+			}
+			data, err = der.WriteGeneric(class, construction, typ, payload)
+			return data, 1, err
+		} else if construction == "CONSTRUCTED" {
+			innerLines := SliceHigherIndents(lines[lineno+1:], orig.IndentLevel())
+			payload, err := Parse(innerLines)
+			if err != nil {
+				return nil, 0, err
+			}
+			data, err = der.WriteGeneric(class, construction, typ, string(payload))
+			return data, len(innerLines) + 1, err
+		} else {
+			return nil, 0, fmt.Errorf("Unrecognized construction %s", construction)
 		}
-		data, err = der.WriteGeneric(class, construction, typ, payload)
-		return data, 1, err
 	}
 
 	switch typ {
