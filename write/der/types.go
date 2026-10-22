@@ -86,6 +86,7 @@ func encodeOidParts(parts []string) ([]byte, error) {
 			continue
 		}
 		// convert to little-endian bytes, 7 bits per byte with 8th bit set
+		reversed := make([]byte, 0)
 		for num != 0 {
 			reversed = append(reversed, byte(0x80|(num&0x7f)))
 			num = num >> 7
